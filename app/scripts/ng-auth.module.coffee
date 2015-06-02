@@ -83,4 +83,5 @@ run.$inject = [
   'TokenService'
   'AuthService'
 ]
+
 angular.module('appirio-tech-ng-auth', dependencies).config(config).run run
