@@ -1,7 +1,6 @@
 'use strict'
 
 srv    = null
-result = null
 
 describe 'Token Service', ->
   beforeEach inject (TokenService) ->
