@@ -3,21 +3,19 @@
 TokenService = (
   $rootScope
   $http
-  exception
   store
-  auth0TokenName
+  AUTH0_TOKEN_NAME
   jwtHelper
-  apiUrl
 ) ->
   getToken = ->
     # the angular-store module takes care of the caching
-    store.get auth0TokenName
+    store.get AUTH0_TOKEN_NAME
 
   setToken = (token) ->
-    store.set auth0TokenName, token
+    store.set AUTH0_TOKEN_NAME, token
 
   deleteToken = ->
-    store.remove auth0TokenName
+    store.remove AUTH0_TOKEN_NAME
 
   decodeToken = ->
     token = getToken()
@@ -35,21 +33,18 @@ TokenService = (
 
     isString && notExpired
 
-  getToken         : getToken
-  deleteToken      : deleteToken
-  decodeToken      : decodeToken
-  setToken         : setToken
-  tokenIsValid     : tokenIsValid
-  deleteAuth0Tokens: deleteAuth0Tokens
+  getToken    : getToken
+  deleteToken : deleteToken
+  decodeToken : decodeToken
+  setToken    : setToken
+  tokenIsValid: tokenIsValid
 
 TokenService.$inject = [
   '$rootScope'
   '$http'
-  'exception'
   'store'
-  'auth0TokenName'
+  'AUTH0_TOKEN_NAME'
   'jwtHelper'
-  'apiUrl'
 ]
 
 angular.module('appirio-tech-ng-auth').factory 'TokenService', TokenService

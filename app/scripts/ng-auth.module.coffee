@@ -1,9 +1,11 @@
 'use strict'
 
 dependencies = [
+  'ngResource'
+  'app.constants'
+  'ui.router'
   'angular-storage'
   'angular-jwt'
-  'app.constants'
   'auth0'
 ]
 
@@ -11,8 +13,8 @@ config = (
   $httpProvider
   jwtInterceptorProvider
   authProvider
-  auth0Domain
-  auth0ClientId
+  AUTH0_DOMAIN
+  AUTH0_CLIENT_ID
 ) ->
   jwtInterceptor = (TokenService) ->
     TokenService.getToken()
@@ -24,8 +26,8 @@ config = (
   $httpProvider.interceptors.push 'jwtInterceptor'
 
   authProvider.init
-    domain    : auth0Domain
-    clientID  : auth0ClientId
+    domain    : AUTH0_DOMAIN
+    clientID  : AUTH0_CLIENT_ID
     loginState: 'login'
 
   logout = (TokenService) ->
@@ -65,4 +67,20 @@ run = (
 
     $rootScope.$on '$stateChangeStart', checkAuth
 
-angular.module('appirio-tech-ng-auth', dependencies).config(config).run authRun
+config.$inject = [
+  '$httpProvider'
+  'jwtInterceptorProvider'
+  'authProvider'
+  'AUTH0_DOMAIN'
+  'AUTH0_CLIENT_ID'
+]
+
+run.$inject = [
+  '$rootScope'
+  '$injector'
+  '$state'
+  'auth'
+  'TokenService'
+  'AuthService'
+]
+angular.module('appirio-tech-ng-auth', dependencies).config(config).run run

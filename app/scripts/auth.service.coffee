@@ -3,20 +3,18 @@
 AuthService = (
   $rootScope
   AuthorizationsAPIService
-  exception
   auth
   store
   TokenService
-  logger
+  $state
 ) ->
   logout = ->
-    logoutComplete = (data, status, headers, config) ->
+    logoutComplete = (response, status, headers, config) ->
       auth.signout()
       TokenService.deleteToken()
       $rootScope.$broadcast 'logout'
 
-    AuthorizationsAPIService.remove('auth').then(logoutComplete).catch (message) ->
-      exception.catcher(message.statusText)(message)
+    AuthorizationsAPIService.remove().then(logoutComplete).catch (message) ->
       $state.reload()
 
   login = (options) ->
@@ -48,11 +46,6 @@ AuthService = (
       exchangeToken idToken, refreshToken, options.success
 
   exchangeToken = (idToken, refreshToken, success, error) ->
-    query =
-      param:
-        refreshToken: refreshToken
-        externalToken: idToken
-
     onSuccess = (res) ->
       TokenService.setToken res.result.content.token
 
@@ -63,7 +56,14 @@ AuthService = (
     onError = (res) ->
       error?(res)
 
-    AuthorizationsAPIService.create('auth', query).then onSuccess, onError
+    params =
+      param:
+        refreshToken: refreshToken
+        externalToken: idToken
+
+    newAuth = new AuthorizationsAPIService params
+
+    newAuth.$save onSuccess, onError
 
   refreshToken = ->
     onSuccess = (response) ->
@@ -75,7 +75,7 @@ AuthService = (
     onError = (response) ->
       TokenService.deleteToken()
 
-    AuthorizationsAPIService.get('auth', id: 1).then onSuccess, onError
+    AuthorizationsAPIService.get(id: 1).then onSuccess, onError
 
   isAuthenticated = ->
     TokenService.tokenIsValid()
@@ -85,15 +85,14 @@ AuthService = (
   isAuthenticated: isAuthenticated
   exchangeToken  : exchangeToken
   refreshToken   : refreshToken
-  register       : register
 
 AuthService.$inject = [
  '$rootScope'
  'AuthorizationsAPIService'
- 'exception'
  'auth'
  'store'
  'TokenService'
+ '$state'
 ]
 
-angular.module('ng-auth').factory 'AuthService', AuthService
+angular.module('appirio-tech-ng-auth').factory 'AuthService', AuthService
