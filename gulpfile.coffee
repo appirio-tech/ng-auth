@@ -33,16 +33,17 @@ configs =
   coffeeFiles     : 'app/**/*.coffee'
   jadeFiles       : 'app/**/*.jade'
   scssFiles       : 'app/**/*.scss'
-  scssIncludePaths: require('node-neat').includePaths
+  scssIncludePaths: require('appirio-work-styles').includePaths
   tempFolder      : '.tmp'
   appFolder       : 'app'
   distFolder      : 'dist'
   karma           : karmaConfig
   fixtureFiles    : fixtureFiles
   constants:
-    apiUrl   : 'https://api.topcoder-dev.com/v3/' # slash is grandfathered in from river
-    API_URL_V2 : 'https://api.topcoder-dev.com/v2' # Should not end in slash
-    AVATAR_URL: 'http://www.topcoder.com' # Should not end in slash
+    apiUrl        : 'https://api.topcoder-dev.com/v3/' # slash is grandfathered in from river
+    API_URL_V2    : 'https://api.topcoder-dev.com/v2' # Should not end in slash
+    AVATAR_URL    : 'http://www.topcoder.com' # Should not end in slash
+    SUBMISSION_URL: 'https://studio.topcoder.com'
   coverageReporter:
     type: 'lcov'
     dir: 'coverage'
