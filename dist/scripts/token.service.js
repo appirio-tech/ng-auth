@@ -23,11 +23,14 @@
       }
     };
     tokenIsValid = function() {
-      var isString, notExpired, token;
+      var isString, token;
       token = getToken();
       isString = typeof token === 'string';
-      notExpired = !jwtHelper.isTokenExpired(token);
-      return isString && notExpired;
+      if (isString) {
+        return !jwtHelper.isTokenExpired(token);
+      } else {
+        return false;
+      }
     };
     return {
       getToken: getToken,
