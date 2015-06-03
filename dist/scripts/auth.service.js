@@ -17,14 +17,10 @@
     };
     login = function(options) {
       var defaultOptions, lOptions, onError, onSuccess, params;
-      TokenService.deleteToken();
       defaultOptions = {
         retUrl: '/'
       };
       lOptions = angular.extend({}, options, defaultOptions);
-      if (options.state) {
-        store.set('login-state', options.state);
-      }
       params = {
         username: lOptions.username,
         password: lOptions.password,
@@ -34,13 +30,17 @@
           scope: 'openid profile offline_access'
         }
       };
-      auth.signin(params, onSuccess, onError);
       onError = function(err) {
         return options.error(err);
       };
-      return onSuccess = function(profile, idToken, accessToken, state, refreshToken) {
+      onSuccess = function(profile, idToken, accessToken, state, refreshToken) {
         return exchangeToken(idToken, refreshToken, options.success);
       };
+      TokenService.deleteToken();
+      if (options.state) {
+        store.set('login-state', options.state);
+      }
+      return auth.signin(params, onSuccess, onError);
     };
     exchangeToken = function(idToken, refreshToken, success, error) {
       var newAuth, onError, onSuccess, params;

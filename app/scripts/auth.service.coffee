@@ -18,16 +18,10 @@ AuthService = (
       $state.reload()
 
   login = (options) ->
-    # First remove any old tokens
-    TokenService.deleteToken()
-
     defaultOptions =
       retUrl: '/'
 
     lOptions = angular.extend {}, options, defaultOptions
-
-    if options.state
-      store.set 'login-state', options.state
 
     params =
       username  : lOptions.username
@@ -37,13 +31,18 @@ AuthService = (
       authParams:
         scope: 'openid profile offline_access'
 
-    auth.signin params, onSuccess, onError
-
     onError = (err) ->
       options.error err
 
     onSuccess = (profile, idToken, accessToken, state, refreshToken) ->
       exchangeToken idToken, refreshToken, options.success
+
+    # First remove any old tokens
+    TokenService.deleteToken()
+
+    store.set 'login-state', options.state if options.state
+
+    auth.signin params, onSuccess, onError
 
   exchangeToken = (idToken, refreshToken, success, error) ->
     onSuccess = (res) ->
