@@ -5,13 +5,14 @@
   AuthService = function($rootScope, AuthorizationsAPIService, auth, store, TokenService, $state) {
     var exchangeToken, isAuthenticated, login, logout, refreshToken;
     logout = function() {
-      var logoutComplete;
-      logoutComplete = function(response, status, headers, config) {
+      var request;
+      request = AuthorizationsAPIService.remove().$promise;
+      request.then(function(response, status, headers, config) {
         auth.signout();
         TokenService.deleteToken();
         return $rootScope.$broadcast('logout');
-      };
-      return AuthorizationsAPIService.remove().then(logoutComplete)["catch"](function(message) {
+      });
+      return request["catch"](function(message) {
         return $state.reload();
       });
     };

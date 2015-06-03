@@ -9,12 +9,14 @@ AuthService = (
   $state
 ) ->
   logout = ->
-    logoutComplete = (response, status, headers, config) ->
+    request = AuthorizationsAPIService.remove().$promise
+
+    request.then (response, status, headers, config) ->
       auth.signout()
       TokenService.deleteToken()
       $rootScope.$broadcast 'logout'
 
-    AuthorizationsAPIService.remove().then(logoutComplete).catch (message) ->
+    request.catch (message) ->
       $state.reload()
 
   login = (options) ->
