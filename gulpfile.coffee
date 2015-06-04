@@ -4,7 +4,8 @@ $.browserSync = require 'browser-sync'
 $.karma       = require('karma').server
 
 karmaConfig =
-  configFile  : __dirname + '/karma.conf.coffee'
+  configFile  : __dirname + '/node_modules/appirio-gulp-tasks/tasks/karma.conf.coffee'
+  basePath    : __dirname
   coverage    : 'app/**/*.coffee'
   # Dont include coverage files
   coffeeFiles : [
