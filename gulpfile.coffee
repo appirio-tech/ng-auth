@@ -34,6 +34,15 @@ fixtureFiles = [
   'bower_components/appirio-tech-api-schemas/v3-authorizations.json'
 ]
 
+buildFiles =
+  concat:
+    'main.js': [
+      '.tmp/scripts/ng-auth.module.js'
+      '.tmp/scripts/authorizations-api.service.js'
+      '.tmp/scripts/token.service.js'
+      '.tmp/scripts/auth.service.js'
+    ]
+
 configs =
   coffeeFiles     : 'app/**/*.coffee'
   jadeFiles       : 'app/**/*.jade'
@@ -44,6 +53,7 @@ configs =
   distFolder      : 'dist'
   karma           : karmaConfig
   fixtureFiles    : fixtureFiles
+  buildFiles      : buildFiles
   constants:
     apiUrl          : 'https://api.topcoder-dev.com/v3/' # slash is grandfathered in from river
     API_URL         : 'https://api.topcoder-dev.com/v3'
