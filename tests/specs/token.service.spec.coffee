@@ -1,6 +1,12 @@
 'use strict'
 
-srv    = null
+srv = null
+decodedToken = null
+decodeTokenSpy = null
+stateGetStub = null
+token = 'yyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiZXhwIjoxNDMzMjcxNzYwLCJ1c2VySWQiOiI0MDEzNTUxNiIsImlhdCI6MTQzMzI3MTE2MCwianRpIjoiMDZhNzVjM2EtMTQ0MC00MWE3LTk5N2YtZmFmMGVjZjFmOGM1In0.okSjl5KOmGQ6hJEoQxk4SVkFra65_Id6KUQGdAVmJNe'
+validToken = null
+isTokenExpiredSpy = null
 
 describe 'Token Service', ->
   beforeEach inject (TokenService) ->
@@ -20,3 +26,50 @@ describe 'Token Service', ->
 
   it 'should have a tokenIsValid method', ->
     expect(srv.tokenIsValid).to.be.ok
+
+  describe 'decodeToken method', ->
+    context 'when token is null', ->
+      beforeEach ->
+        decodedToken = srv.decodeToken()
+
+      it 'decodedToken to be ok', ->
+        expect(decodedToken).to.be.ok
+
+    context 'when token is `token`', ->
+      beforeEach inject (store, jwtHelper) ->
+        stateGetStub = sinon.stub(store, 'get').returns token
+        decodeTokenSpy = sinon.spy jwtHelper, 'decodeToken'
+        decodedToken = srv.decodeToken()
+
+      afterEach ->
+        stateGetStub.restore()
+        decodeTokenSpy.restore()
+
+      it 'should have called jwtHelper.decodeToken', ->
+        wasCalledWith = decodeTokenSpy.calledWith token
+        expect(wasCalledWith).to.be.ok
+
+      it 'it should match userId: `40135516`', ->
+        expect(decodedToken.userId).to.be.equal '40135516'
+
+  describe 'tokenIsValid method', ->
+    context 'when token is not a string', ->
+      beforeEach ->
+        validToken = srv.tokenIsValid()
+
+      it 'validToken should be false', ->
+        expect(validToken).to.equal false
+
+    context 'when token is `token`', ->
+      beforeEach inject (store, jwtHelper) ->
+        stateGetStub = sinon.stub(store, 'get').returns token
+        isTokenExpiredSpy = sinon.spy jwtHelper, 'isTokenExpired'
+        validToken = srv.tokenIsValid()
+
+      afterEach ->
+        stateGetStub.restore()
+        isTokenExpiredSpy.restore()
+
+      it 'should have called jwtHelper.isTokenExpired', ->
+        wasCalledWith = isTokenExpiredSpy.calledWith token
+        expect(wasCalledWith).to.be.ok
