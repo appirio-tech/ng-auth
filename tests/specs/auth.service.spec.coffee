@@ -70,34 +70,15 @@ describe 'Authorization Service', ->
       wasCalledWith = broadcastSpy.calledWith 'authenticated'
       expect(wasCalledWith).to.be.ok
 
-  describe.only 'refreshToken method', ->
-    beforeEach inject (store, $httpBackend, TokenService) ->
-      stateGetStub = sinon.stub(store, 'get').returns newToken
+  describe 'refreshToken method', ->
+    beforeEach inject ($httpBackend, TokenService) ->
       setTokenSpy  = sinon.spy TokenService, 'setToken'
-      #broadcastSpy = sinon.spy $rootScope, '$broadcast'
       srv.refreshToken()
       $httpBackend.flush()
 
     afterEach ->
       setTokenSpy.restore()
-      stateGetStub.restore()
-      #broadcastSpy.restore()
 
     it 'should have called TokenService.setToken', ->
       wasCalledWith = setTokenSpy.called
       expect(wasCalledWith).to.be.ok
-      # wasCalledWith = broadcastSpy.calledWith 'authenticated'
-      # expect(wasCalledWith).to.be.ok
-
-
-
-
-
-
-
-
-
-
-
-
-
