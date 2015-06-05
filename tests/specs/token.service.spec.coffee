@@ -37,9 +37,9 @@ describe 'Token Service', ->
 
     context 'when token is `token`', ->
       beforeEach inject (store, jwtHelper) ->
-        stateGetStub = sinon.stub(store, 'get').returns token
+        stateGetStub   = sinon.stub(store, 'get').returns token
         decodeTokenSpy = sinon.spy jwtHelper, 'decodeToken'
-        decodedToken = srv.decodeToken()
+        decodedToken   = srv.decodeToken()
 
       afterEach ->
         stateGetStub.restore()
@@ -62,9 +62,9 @@ describe 'Token Service', ->
 
     context 'when token is `token`', ->
       beforeEach inject (store, jwtHelper) ->
-        stateGetStub = sinon.stub(store, 'get').returns token
+        stateGetStub      = sinon.stub(store, 'get').returns token
         isTokenExpiredSpy = sinon.spy jwtHelper, 'isTokenExpired'
-        validToken = srv.tokenIsValid()
+        srv.tokenIsValid()
 
       afterEach ->
         stateGetStub.restore()

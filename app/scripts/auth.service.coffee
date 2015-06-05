@@ -10,7 +10,6 @@ AuthService = (
 ) ->
   logout = ->
     request = AuthorizationsAPIService.remove().$promise
-
     request.then (response, status, headers, config) ->
       auth.signout()
       TokenService.deleteToken()

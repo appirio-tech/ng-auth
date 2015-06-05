@@ -2,6 +2,7 @@
 
 srv    = null
 result = null
+logout = null
 
 describe 'AuthorizationsAPIService', ->
   beforeEach inject (AuthorizationsAPIService) ->
@@ -51,24 +52,3 @@ describe 'AuthorizationsAPIService', ->
 
     it 'should have at some results', ->
       expect(result.content[0].token).to.be.equal "abc"
-
-describe 'Authorization Service', ->
-  beforeEach inject (AuthService) ->
-    srv = AuthService
-
-  it 'should have a logout method', ->
-    expect(srv.logout).to.be.ok
-
-  it 'should have a login method', ->
-    expect(srv.login).to.be.ok
-
-  it 'should have a exchangeToken method', ->
-    expect(srv.exchangeToken).to.be.ok
-
-  it 'should have a refreshToken method', ->
-    expect(srv.refreshToken).to.be.ok
-
-  it 'should have a isAuthenticated method', ->
-    expect(srv.isAuthenticated).to.be.ok
-
-
