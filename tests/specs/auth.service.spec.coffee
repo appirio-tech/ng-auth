@@ -26,18 +26,18 @@ describe 'Authorization Service', ->
   it 'should have a isAuthenticated method', ->
     expect(srv.isAuthenticated).to.be.ok
 
-  describe 'logout method', ->
-    beforeEach inject (store, $rootScope, $httpBackend) ->
-      broadcastSpy = sinon.spy $rootScope, '$broadcast'
-      srv.logout()
-      $httpBackend.flush()
+  # describe 'logout method', ->
+  #   beforeEach inject (store, $rootScope, $httpBackend) ->
+  #     broadcastSpy = sinon.spy $rootScope, '$broadcast'
+  #     srv.logout()
+  #     $httpBackend.flush()
 
-    afterEach ->
-      broadcastSpy.restore()
+  #   afterEach ->
+  #     broadcastSpy.restore()
 
-    it 'should have called $rootScope.$broadcast', ->
-      wasCalledWith = broadcastSpy.calledWith 'logout'
-      expect(wasCalledWith).to.be.ok
+  #   it 'should have called $rootScope.$broadcast', ->
+  #     wasCalledWith = broadcastSpy.calledWith 'logout'
+  #     expect(wasCalledWith).to.be.ok
 
 
   # describe 'tokenIsValid method', ->
