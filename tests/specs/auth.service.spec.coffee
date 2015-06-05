@@ -6,6 +6,7 @@ stateGetStub = null
 broadcastSpy = null
 logout = null
 wasCalledWith = null
+exchangeTokenSpy = null
 
 describe 'Authorization Service', ->
   beforeEach inject (AuthService) ->
@@ -26,38 +27,43 @@ describe 'Authorization Service', ->
   it 'should have a isAuthenticated method', ->
     expect(srv.isAuthenticated).to.be.ok
 
-  # describe 'logout method', ->
-  #   beforeEach inject (store, $rootScope, $httpBackend) ->
-  #     broadcastSpy = sinon.spy $rootScope, '$broadcast'
-  #     srv.logout()
-  #     $httpBackend.flush()
+  describe 'logout method', ->
+    beforeEach inject (store, $rootScope, $httpBackend) ->
+      broadcastSpy = sinon.spy $rootScope, '$broadcast'
+      srv.logout()
+      $httpBackend.flush()
+
+    afterEach ->
+      broadcastSpy.restore()
+
+    it 'should have called $rootScope.$broadcast', ->
+      wasCalledWith = broadcastSpy.calledWith 'logout'
+      expect(wasCalledWith).to.be.ok
+
+  # describe.only 'login method', ->
+  #   beforeEach inject (store) ->
+  #     exchangeTokenSpy = sinon.spy AuthService 'exchangeToken'
+  #     srv.login()
+  #     #$httpBackend.flush()
 
   #   afterEach ->
-  #     broadcastSpy.restore()
+  #     exchangeTokenSpy.restore()
 
-  #   it 'should have called $rootScope.$broadcast', ->
-  #     wasCalledWith = broadcastSpy.calledWith 'logout'
+  #   it 'should have called exchangeToken', ->
+  #     wasCalledWith = exchangeTokenSpy.calledWith 'idToken, refreshToken, options.success'
   #     expect(wasCalledWith).to.be.ok
 
+  describe 'exchangeToken method', ->
+    beforeEach inject (store, $rootScope, $httpBackend) ->
+      broadcastSpy = sinon.spy $rootScope, '$broadcast'
+      srv.exchangeToken()
+      $httpBackend.flush()
 
-  # describe 'tokenIsValid method', ->
-  #   context 'when token is not a string', ->
-  #     beforeEach ->
-  #       validToken = srv.tokenIsValid()
+    afterEach ->
+      broadcastSpy.restore()
 
-  #     it 'validToken should be false', ->
-  #       expect(validToken).to.equal false
+    it 'should have called $rootScope.$broadcast', ->
+      wasCalledWith = broadcastSpy.calledWith 'authenticated'
+      expect(wasCalledWith).to.be.ok
 
-  #   context 'when token is `token`', ->
-  #     beforeEach inject (store, jwtHelper) ->
-  #       stateGetStub = sinon.stub(store, 'get').returns token
-  #       isTokenExpiredSpy = sinon.spy jwtHelper, 'isTokenExpired'
-  #       validToken = srv.tokenIsValid()
 
-  #     afterEach ->
-  #       stateGetStub.restore()
-  #       isTokenExpiredSpy.restore()
-
-  #     it 'should have called jwtHelper.isTokenExpired', ->
-  #       wasCalledWith = isTokenExpiredSpy.calledWith token
-  #       expect(wasCalledWith).to.be.ok
