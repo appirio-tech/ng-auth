@@ -2,6 +2,7 @@
 
 srv    = null
 result = null
+logout = null
 
 describe 'AuthorizationsAPIService', ->
   beforeEach inject (AuthorizationsAPIService) ->
@@ -39,7 +40,7 @@ describe 'AuthorizationsAPIService', ->
 
       $httpBackend.flush()
 
-    it 'should have at some results', ->
+    it 'should have some results', ->
       expect(result.content[0].token).to.be.equal "abc"
 
   describe 'remove authorization', ->

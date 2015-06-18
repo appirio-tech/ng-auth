@@ -10,7 +10,6 @@ AuthService = (
 ) ->
   logout = ->
     request = AuthorizationsAPIService.remove().$promise
-
     request.then (response, status, headers, config) ->
       auth.signout()
       TokenService.deleteToken()
@@ -50,7 +49,7 @@ AuthService = (
     onSuccess = (res) ->
       TokenService.setToken res.result.content.token
 
-      $rootScope.$broadcast 'authenticated'
+      $rootScope.$broadcast 'authenticated' # **
 
       success?(res)
 
@@ -76,7 +75,11 @@ AuthService = (
     onError = (response) ->
       TokenService.deleteToken()
 
-    AuthorizationsAPIService.get(id: 1).then onSuccess, onError
+    resource = AuthorizationsAPIService.get(id: 1).$promise
+
+    resource.then onSuccess
+
+    resource.catch onError
 
   isAuthenticated = ->
     TokenService.tokenIsValid()
