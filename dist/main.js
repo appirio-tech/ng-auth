@@ -192,7 +192,7 @@
       return newAuth.$save(onSuccess, onError);
     };
     refreshToken = function() {
-      var onError, onSuccess;
+      var onError, onSuccess, resource;
       onSuccess = function(response) {
         var newToken;
         newToken = response.result.content.token;
@@ -202,9 +202,11 @@
       onError = function(response) {
         return TokenService.deleteToken();
       };
-      return AuthorizationsAPIService.get({
+      resource = AuthorizationsAPIService.get({
         id: 1
-      }).then(onSuccess, onError);
+      }).$promise;
+      resource.then(onSuccess);
+      return resource["catch"](onError);
     };
     isAuthenticated = function() {
       return TokenService.tokenIsValid();
@@ -221,5 +223,63 @@
   AuthService.$inject = ['$rootScope', 'AuthorizationsAPIService', 'auth', 'store', 'TokenService', '$state'];
 
   angular.module('appirio-tech-ng-auth').factory('AuthService', AuthService);
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var srv, transformResponse;
+
+  transformResponse = function(response) {
+    var parsed, ref;
+    parsed = JSON.parse(response);
+    return (parsed != null ? (ref = parsed.result) != null ? ref.content : void 0 : void 0) || {};
+  };
+
+  srv = function($resource, API_URL) {
+    var actions, params, url;
+    url = API_URL + '/users/:id';
+    params = {
+      id: '@id'
+    };
+    actions = {
+      get: {
+        method: 'GET',
+        isArray: false,
+        transformResponse: transformResponse
+      }
+    };
+    return $resource(url, params, actions);
+  };
+
+  srv.$inject = ['$resource', 'API_URL'];
+
+  angular.module('appirio-tech-ng-auth').factory('UserV3APIService', srv);
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var srv;
+
+  srv = function(UserV3APIService, TokenService) {
+    var getCurrentUser;
+    return getCurrentUser = function(setUser) {
+      var decodedToken, resource;
+      decodedToken = TokenService.decodedToken;
+      if (decodedToken.userId.length) {
+        resource = UserV3APIService.get(decodedToken.userId);
+        resource.$promise.then(function(response) {
+          return response.result.content;
+        });
+        resource.$promise["catch"](function() {});
+        return resource.$promise["finally"](function() {});
+      }
+    };
+  };
+
+  srv.$inject = ['UserV3APIService'];
+
+  angular.module('appirio-tech-ng-auth').factory('UserV3Service', srv);
 
 }).call(this);
