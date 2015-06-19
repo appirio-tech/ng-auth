@@ -9,7 +9,7 @@
   "devDependencies": {
     "angular-mocks": "1.4.x",
     "sinon": "http://sinonjs.org/releases/sinon-1.12.1.js",
-    "appirio-tech-api-schemas": "git@github.com:appirio-tech/api-schemas#1.0.103",
+    "appirio-tech-api-schemas": "git@github.com:appirio-tech/api-schemas#1.0.x",
     "auto-config-fake-server": "1.x.x"
   },
   "dependencies": {
