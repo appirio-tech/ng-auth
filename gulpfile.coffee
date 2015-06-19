@@ -20,7 +20,7 @@ karmaConfig =
     'bower_components/auth0.js/build/auth0.js'
     'bower_components/auth0-angular/build/auth0-angular.js'
     'bower_components/angular-ui-router/release/angular-ui-router.js'
-    'bower_components/auto-config-fake-server/dist/scripts/auto-config-fake-server.js'
+    'bower_components/auto-config-fake-server/dist/auto-config-fake-server.js'
     'tests/specs/helper.coffee'
     '.tmp/scripts/constants.js'
     '.tmp/scripts/json-fixtures.js'
@@ -33,15 +33,18 @@ fixtureFiles = [
   'bower_components/appirio-tech-api-schemas/v3.json'
   'bower_components/appirio-tech-api-schemas/v2.json'
   'bower_components/appirio-tech-api-schemas/v3-authorizations.json'
+  'bower_components/appirio-tech-api-schemas/v3-users.json'
 ]
 
 buildFiles =
   concat:
     'main.js': [
-      '.tmp/scripts/ng-auth.module.js'
-      '.tmp/scripts/authorizations-api.service.js'
-      '.tmp/scripts/token.service.js'
-      '.tmp/scripts/auth.service.js'
+      '.tmp/scripts/ng-auth.module.js',
+      '.tmp/scripts/authorizations-api.service.js',
+      '.tmp/scripts/token.service.js',
+      '.tmp/scripts/auth.service.js',
+      '.tmp/scripts/user-v3-api.service.js',
+      '.tmp/scripts/user-v3.service.js'
     ]
 
 configs =

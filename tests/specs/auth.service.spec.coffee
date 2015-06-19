@@ -11,6 +11,7 @@ setTokenSpy = null
 getSpy = null
 newToken = 'yyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiZXhwIjoxNDMzMjcxNzYwLCJ1c2VySWQiOiI0MDEzNTUxNiIsImlhdCI6MTQzMzI3MTE2MCwianRpIjoiMDZhNzVjM2EtMTQ0MC00MWE3LTk5N2YtZmFmMGVjZjFmOGM1In0.okSjl5KOmGQ6hJEoQxk4SVkFra65_Id6KUQGdAVmJNe'
 stateGetStub = null
+checkRedirectSpy = null
 
 describe 'Authorization Service', ->
   beforeEach inject (AuthService) ->
@@ -45,7 +46,7 @@ describe 'Authorization Service', ->
       expect(wasCalledWith).to.be.ok
 
   # describe 'login method', ->
-  #   beforeEach inject (store, $httpBackend) ->
+  #   beforeEach inject ($httpBackend) ->
   #     exchangeTokenSpy = sinon.spy srv, 'exchangeToken'
   #     srv.login()
   #     $httpBackend.flush()
@@ -54,7 +55,7 @@ describe 'Authorization Service', ->
   #     exchangeTokenSpy.restore()
 
   #   it 'should have called exchangeToken', ->
-  #     wasCalledWith = exchangeTokenSpy.calledWith 'idToken, refreshToken, options.success'
+  #     wasCalledWith = exchangeTokenSpy.called
   #     expect(wasCalledWith).to.be.ok
 
   describe 'exchangeToken method', ->
@@ -82,3 +83,12 @@ describe 'Authorization Service', ->
     it 'should have called TokenService.setToken', ->
       wasCalledWith = setTokenSpy.called
       expect(wasCalledWith).to.be.ok
+
+# describe 'checkRedirect method', ->
+#   context 'when isInvalidToken is false'
+#     beforeEach inject ($httpBackend) ->
+#       checkRedirectSpy = sinon.spy 
+      #don't know how to call a function  that's not inside an object
+
+
+
