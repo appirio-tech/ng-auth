@@ -1,18 +1,24 @@
 'use strict'
 
 srv = (UserV3APIService, TokenService) ->
-  getCurrentUser = (setUser) ->
-    decodedToken = TokenService.decodedToken
+  getCurrentUser = (callback) ->
+    decodedToken = TokenService.decodeToken()
 
-    if decodedToken.userId.length
-      resource = UserV3APIService.get decodedToken.userId
+    if decodedToken.userId
+      params =
+        id: decodedToken.userId
+
+      resource = UserV3APIService.get params
 
       resource.$promise.then (response) ->
-        response.result.content #  or wherever the user is stored in
+        callback? response
+
       resource.$promise.catch ->
 
       resource.$promise.finally ->
 
-srv.$inject = ['UserV3APIService']
+  getCurrentUser: getCurrentUser
+
+srv.$inject = ['UserV3APIService', 'TokenService']
 
 angular.module('appirio-tech-ng-auth').factory 'UserV3Service', srv

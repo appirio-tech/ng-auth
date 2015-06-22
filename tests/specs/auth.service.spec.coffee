@@ -45,19 +45,6 @@ describe 'Authorization Service', ->
       wasCalledWith = broadcastSpy.calledWith 'logout'
       expect(wasCalledWith).to.be.ok
 
-  # describe 'login method', ->
-  #   beforeEach inject ($httpBackend) ->
-  #     exchangeTokenSpy = sinon.spy srv, 'exchangeToken'
-  #     srv.login()
-  #     $httpBackend.flush()
-
-  #   afterEach ->
-  #     exchangeTokenSpy.restore()
-
-  #   it 'should have called exchangeToken', ->
-  #     wasCalledWith = exchangeTokenSpy.called
-  #     expect(wasCalledWith).to.be.ok
-
   describe 'exchangeToken method', ->
     beforeEach inject ($rootScope, $httpBackend) ->
       broadcastSpy = sinon.spy $rootScope, '$broadcast'
@@ -83,12 +70,3 @@ describe 'Authorization Service', ->
     it 'should have called TokenService.setToken', ->
       wasCalledWith = setTokenSpy.called
       expect(wasCalledWith).to.be.ok
-
-# describe 'checkRedirect method', ->
-#   context 'when isInvalidToken is false'
-#     beforeEach inject ($httpBackend) ->
-#       checkRedirectSpy = sinon.spy 
-      #don't know how to call a function  that's not inside an object
-
-
-
