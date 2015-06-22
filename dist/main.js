@@ -264,21 +264,27 @@
 
   srv = function(UserV3APIService, TokenService) {
     var getCurrentUser;
-    return getCurrentUser = function(setUser) {
-      var decodedToken, resource;
-      decodedToken = TokenService.decodedToken;
-      if (decodedToken.userId.length) {
-        resource = UserV3APIService.get(decodedToken.userId);
+    getCurrentUser = function(callback) {
+      var decodedToken, params, resource;
+      decodedToken = TokenService.decodeToken();
+      if (decodedToken.userId) {
+        params = {
+          id: decodedToken.userId
+        };
+        resource = UserV3APIService.get(params);
         resource.$promise.then(function(response) {
-          return response.result.content;
+          return typeof callback === "function" ? callback(response) : void 0;
         });
         resource.$promise["catch"](function() {});
         return resource.$promise["finally"](function() {});
       }
     };
+    return {
+      getCurrentUser: getCurrentUser
+    };
   };
 
-  srv.$inject = ['UserV3APIService'];
+  srv.$inject = ['UserV3APIService', 'TokenService'];
 
   angular.module('appirio-tech-ng-auth').factory('UserV3Service', srv);
 
