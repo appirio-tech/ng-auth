@@ -13,7 +13,7 @@ bower install appirio-tech-ng-auth=git@github.com:appirio-tech/ng-auth --save
 <script src="/bower_components/appirio-tech-ng-auth/dist/main.js" type="text/javascript"></script>
 ```
 
-### Add depedency
+### Add dependency
 ```coffeescript
 'use strict'
 
