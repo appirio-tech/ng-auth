@@ -11,9 +11,6 @@ describe 'UserV3 Service', ->
   it 'should have a getCurrentUser method', ->
     expect(srv.getCurrentUser).to.be.ok
 
-  it 'should have a callback method', ->
-    expect(srv.callback).to.be.ok
-
   describe 'getCurrentUser method', ->
     beforeEach inject ($httpBackend, TokenService) ->
       stubToken = sinon.stub TokenService, 'decodeToken'
