@@ -74,6 +74,7 @@ AuthService = (
 
     onError = (response) ->
       TokenService.deleteToken()
+      $rootScope.$broadcast 'logout'
 
     resource = AuthorizationsAPIService.get(id: 1).$promise
 
@@ -82,7 +83,13 @@ AuthService = (
     resource.catch onError
 
   isAuthenticated = ->
-    TokenService.tokenIsValid()
+    if TokenService.tokenIsValid()
+      true
+    else if TokenService.tokenIsExpired()
+      refreshToken()
+      true
+    else
+      false
 
   login          : login
   logout         : logout
