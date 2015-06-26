@@ -25,6 +25,10 @@ TokenService = (
     else
       {}
 
+  tokenIsExpired = ->
+    token    = getToken()
+    jwtHelper.isTokenExpired token
+
   tokenIsValid = ->
     token    = getToken()
     isString = (typeof token == 'string')
@@ -39,6 +43,7 @@ TokenService = (
   decodeToken : decodeToken
   setToken    : setToken
   tokenIsValid: tokenIsValid
+  tokenIsExpired: tokenIsExpired
 
 TokenService.$inject = [
   '$rootScope'
