@@ -26,6 +26,7 @@ TokenService = (
       {}
 
   tokenIsExpired = ->
+    token    = getToken()
     jwtHelper.isTokenExpired token
 
   tokenIsValid = ->

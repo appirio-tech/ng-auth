@@ -83,7 +83,7 @@
   var TokenService;
 
   TokenService = function($rootScope, $http, store, AUTH0_TOKEN_NAME, jwtHelper) {
-    var decodeToken, deleteToken, getToken, setToken, tokenIsValid;
+    var decodeToken, deleteToken, getToken, setToken, tokenIsExpired, tokenIsValid;
     getToken = function() {
       return store.get(AUTH0_TOKEN_NAME);
     };
@@ -102,6 +102,11 @@
         return {};
       }
     };
+    tokenIsExpired = function() {
+      var token;
+      token = getToken();
+      return jwtHelper.isTokenExpired(token);
+    };
     tokenIsValid = function() {
       var isString, token;
       token = getToken();
@@ -117,7 +122,8 @@
       deleteToken: deleteToken,
       decodeToken: decodeToken,
       setToken: setToken,
-      tokenIsValid: tokenIsValid
+      tokenIsValid: tokenIsValid,
+      tokenIsExpired: tokenIsExpired
     };
   };
 
@@ -200,7 +206,8 @@
         return $rootScope.$broadcast('authenticated');
       };
       onError = function(response) {
-        return TokenService.deleteToken();
+        TokenService.deleteToken();
+        return $rootScope.$broadcast('logout');
       };
       resource = AuthorizationsAPIService.get({
         id: 1
@@ -209,7 +216,14 @@
       return resource["catch"](onError);
     };
     isAuthenticated = function() {
-      return TokenService.tokenIsValid();
+      if (TokenService.tokenIsValid()) {
+        return true;
+      } else if (TokenService.tokenIsExpired()) {
+        refreshToken();
+        return true;
+      } else {
+        return false;
+      }
     };
     return {
       login: login,
