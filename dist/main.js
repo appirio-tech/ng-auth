@@ -103,19 +103,20 @@
       }
     };
     tokenIsExpired = function() {
-      var token;
+      var isString, token;
       token = getToken();
-      return jwtHelper.isTokenExpired(token);
+      isString = typeof token === 'string';
+      if (isString) {
+        return jwtHelper.isTokenExpired(token);
+      } else {
+        return true;
+      }
     };
     tokenIsValid = function() {
       var isString, token;
       token = getToken();
       isString = typeof token === 'string';
-      if (isString) {
-        return !jwtHelper.isTokenExpired(token);
-      } else {
-        return false;
-      }
+      return isString;
     };
     return {
       getToken: getToken,
@@ -217,9 +218,9 @@
     };
     isAuthenticated = function() {
       if (TokenService.tokenIsValid()) {
-        return true;
-      } else if (TokenService.tokenIsExpired()) {
-        refreshToken();
+        if (TokenService.tokenIsExpired()) {
+          refreshToken();
+        }
         return true;
       } else {
         return false;
