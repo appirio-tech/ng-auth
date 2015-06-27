@@ -27,16 +27,18 @@ TokenService = (
 
   tokenIsExpired = ->
     token    = getToken()
-    jwtHelper.isTokenExpired token
+    isString = (typeof token == 'string')
+
+    if isString
+      jwtHelper.isTokenExpired token
+    else
+      true
 
   tokenIsValid = ->
     token    = getToken()
     isString = (typeof token == 'string')
 
-    if isString
-      !jwtHelper.isTokenExpired token
-    else
-      false
+    isString
 
   getToken    : getToken
   deleteToken : deleteToken
