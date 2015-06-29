@@ -278,7 +278,7 @@
   var srv;
 
   srv = function(UserV3APIService, TokenService) {
-    var getCurrentUser;
+    var createUser, getCurrentUser;
     getCurrentUser = function(callback) {
       var decodedToken, params, resource;
       decodedToken = TokenService.decodeToken();
@@ -294,8 +294,38 @@
         return resource.$promise["finally"](function() {});
       }
     };
+    createUser = function(options, callback) {
+      var resource, userParams;
+      if (options.handle && options.email && options.password) {
+        userParams = {
+          params: {
+            handle: options.handle,
+            email: options.email,
+            utmSource: options.utmSource || 'asp',
+            utmMedium: options.utmMedium || '',
+            utmCampaign: options.utmCampaign || '',
+            firstName: options.firstname,
+            lastName: options.lastname,
+            credential: {
+              password: options.password
+            }
+          }
+        };
+        resource = UserV3APIService.save(userParams);
+        resource.$promise.then(function(response) {
+          return typeof callback === "function" ? callback(response) : void 0;
+        });
+        resource.$promise["catch"](function(response) {
+          return console.log("catch" + response);
+        });
+        return resource.$promise["finally"](function(response) {
+          return console.log("finally" + response);
+        });
+      }
+    };
     return {
-      getCurrentUser: getCurrentUser
+      getCurrentUser: getCurrentUser,
+      createUser: createUser
     };
   };
 
