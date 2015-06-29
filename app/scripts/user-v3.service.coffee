@@ -1,7 +1,11 @@
 'use strict'
 
-srv = (UserV3APIService, TokenService) ->
-  getCurrentUser = (callback) ->
+srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
+  currentUser = null
+
+  getCurrentUser = (callback = null) ->
+    return currentUser if currentUser
+
     decodedToken = TokenService.decodeToken()
 
     if decodedToken.userId
@@ -11,7 +15,7 @@ srv = (UserV3APIService, TokenService) ->
       resource = UserV3APIService.get params
 
       resource.$promise.then (response) ->
-        callback? response
+        currentUser = response
 
       resource.$promise.catch ->
 
@@ -31,13 +35,13 @@ srv = (UserV3APIService, TokenService) ->
     if options.handle && options.email && options.password
       userParams =
         params:
-          handle     : options.handle,
-          email      : options.email,
-          utmSource  : options.utmSource || 'asp',
-          utmMedium  : options.utmMedium || '',
-          utmCampaign: options.utmCampaign || '',
-          firstName  : options.firstname,
-          lastName   : options.lastname,
+          handle     : options.handle
+          email      : options.email
+          utmSource  : options.utmSource || 'asp'
+          utmMedium  : options.utmMedium || ''
+          utmCampaign: options.utmCampaign || ''
+          firstName  : options.firstname
+          lastName   : options.lastname
           credential :
             password: options.password
 
@@ -52,9 +56,13 @@ srv = (UserV3APIService, TokenService) ->
       resource.$promise.finally (response) ->
         console.log "finally" + response
 
-  getCurrentUser: getCurrentUser
-  createUser: createUser
+  $rootScope.$watch AuthService.isLoggedIn, ->
+    currentUser = null
+    getCurrentUser() if AuthService.isLoggedIn()
 
-srv.$inject = ['UserV3APIService', 'TokenService']
+  getCurrentUser: getCurrentUser
+  createUser    : createUser
+
+srv.$inject = ['UserV3APIService', 'TokenService', 'AuthService', '$rootScope']
 
 angular.module('appirio-tech-ng-auth').factory 'UserV3Service', srv

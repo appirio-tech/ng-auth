@@ -139,14 +139,19 @@
   var AuthService;
 
   AuthService = function($rootScope, AuthorizationsAPIService, auth, store, TokenService, $state) {
-    var exchangeToken, isAuthenticated, login, logout, refreshToken;
+    var exchangeToken, isAuthenticated, isLoggedIn, loggedIn, login, logout, refreshToken;
+    loggedIn = false;
+    isLoggedIn = function() {
+      return loggedIn;
+    };
     logout = function() {
       var request;
       request = AuthorizationsAPIService.remove().$promise;
       request.then(function(response, status, headers, config) {
         auth.signout();
         TokenService.deleteToken();
-        return $rootScope.$broadcast('logout');
+        $rootScope.$broadcast('logout');
+        return loggedIn = false;
       });
       return request["catch"](function(message) {
         return $state.reload();
@@ -184,6 +189,7 @@
       onSuccess = function(res) {
         TokenService.setToken(res.result.content.token);
         $rootScope.$broadcast('authenticated');
+        loggedIn = true;
         return typeof success === "function" ? success(res) : void 0;
       };
       onError = function(res) {
@@ -229,6 +235,7 @@
     return {
       login: login,
       logout: logout,
+      isLoggedIn: isLoggedIn,
       isAuthenticated: isAuthenticated,
       exchangeToken: exchangeToken,
       refreshToken: refreshToken
@@ -277,10 +284,17 @@
   'use strict';
   var srv;
 
-  srv = function(UserV3APIService, TokenService) {
-    var createUser, getCurrentUser;
+  srv = function(UserV3APIService, TokenService, AuthService, $rootScope) {
+    var createUser, currentUser, getCurrentUser;
+    currentUser = null;
     getCurrentUser = function(callback) {
       var decodedToken, params, resource;
+      if (callback == null) {
+        callback = null;
+      }
+      if (currentUser) {
+        return currentUser;
+      }
       decodedToken = TokenService.decodeToken();
       if (decodedToken.userId) {
         params = {
@@ -288,7 +302,7 @@
         };
         resource = UserV3APIService.get(params);
         resource.$promise.then(function(response) {
-          return typeof callback === "function" ? callback(response) : void 0;
+          return currentUser = response;
         });
         resource.$promise["catch"](function() {});
         return resource.$promise["finally"](function() {});
@@ -323,13 +337,19 @@
         });
       }
     };
+    $rootScope.$watch(AuthService.isLoggedIn, function() {
+      currentUser = null;
+      if (AuthService.isLoggedIn()) {
+        return getCurrentUser();
+      }
+    });
     return {
       getCurrentUser: getCurrentUser,
       createUser: createUser
     };
   };
 
-  srv.$inject = ['UserV3APIService', 'TokenService'];
+  srv.$inject = ['UserV3APIService', 'TokenService', 'AuthService', '$rootScope'];
 
   angular.module('appirio-tech-ng-auth').factory('UserV3Service', srv);
 

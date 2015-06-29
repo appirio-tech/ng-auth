@@ -8,12 +8,18 @@ AuthService = (
   TokenService
   $state
 ) ->
+  loggedIn = false
+
+  isLoggedIn = ->
+    loggedIn
+
   logout = ->
     request = AuthorizationsAPIService.remove().$promise
     request.then (response, status, headers, config) ->
       auth.signout()
       TokenService.deleteToken()
-      $rootScope.$broadcast 'logout'
+      $rootScope.$broadcast 'logout' # need to remove in favor of isLoggedIn function
+      loggedIn = false
 
     request.catch (message) ->
       $state.reload()
@@ -49,7 +55,8 @@ AuthService = (
     onSuccess = (res) ->
       TokenService.setToken res.result.content.token
 
-      $rootScope.$broadcast 'authenticated' # **
+      $rootScope.$broadcast 'authenticated' # need to remove in favor of isLoggedIn function
+      loggedIn = true
 
       success?(res)
 
@@ -91,6 +98,7 @@ AuthService = (
 
   login          : login
   logout         : logout
+  isLoggedIn     : isLoggedIn
   isAuthenticated: isAuthenticated
   exchangeToken  : exchangeToken
   refreshToken   : refreshToken

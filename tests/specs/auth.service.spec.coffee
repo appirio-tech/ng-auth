@@ -1,16 +1,17 @@
 'use strict'
 
-srv    = null
-logout = null
-stateGetStub = null
-broadcastSpy = null
-logout = null
-wasCalledWith = null
+srv              = null
+logout           = null
+stateGetStub     = null
+broadcastSpy     = null
+logout           = null
+wasCalledWith    = null
+wasCalled        = null
 exchangeTokenSpy = null
-setTokenSpy = null
-getSpy = null
-newToken = 'yyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiZXhwIjoxNDMzMjcxNzYwLCJ1c2VySWQiOiI0MDEzNTUxNiIsImlhdCI6MTQzMzI3MTE2MCwianRpIjoiMDZhNzVjM2EtMTQ0MC00MWE3LTk5N2YtZmFmMGVjZjFmOGM1In0.okSjl5KOmGQ6hJEoQxk4SVkFra65_Id6KUQGdAVmJNe'
-stateGetStub = null
+setTokenSpy      = null
+getSpy           = null
+newToken         = 'yyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FwaS50b3Bjb2Rlci1kZXYuY29tIiwiZXhwIjoxNDMzMjcxNzYwLCJ1c2VySWQiOiI0MDEzNTUxNiIsImlhdCI6MTQzMzI3MTE2MCwianRpIjoiMDZhNzVjM2EtMTQ0MC00MWE3LTk5N2YtZmFmMGVjZjFmOGM1In0.okSjl5KOmGQ6hJEoQxk4SVkFra65_Id6KUQGdAVmJNe'
+stateGetStub     = null
 checkRedirectSpy = null
 
 describe 'Authorization Service', ->
@@ -44,6 +45,18 @@ describe 'Authorization Service', ->
     it 'should have called $rootScope.$broadcast', ->
       wasCalledWith = broadcastSpy.calledWith 'logout'
       expect(wasCalledWith).to.be.ok
+
+  describe 'login method', ->
+    beforeEach ->
+      exchangeTokenSpy = sinon.spy srv, 'exchangeToken'
+
+    afterEach ->
+      exchangeTokenSpy.restore()
+
+    it 'should have called exchangeToken', ->
+      wasCalledWih = exchangeTokenSpy.calledWith 'idToken', 'refreshToken', 'options.success'
+      expect(wasCalledWith).to.be.ok
+
 
   describe 'exchangeToken method', ->
     beforeEach inject ($rootScope, $httpBackend) ->
