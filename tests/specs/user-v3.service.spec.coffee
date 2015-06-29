@@ -8,7 +8,7 @@ userData       = null
 success        = null
 isLoggedInStub = null
 decodeTokenSpy = null
-currentUser = null
+currentUser    = null
 
 describe 'UserV3 Service', ->
   beforeEach inject (UserV3Service) ->
