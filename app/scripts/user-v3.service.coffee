@@ -31,7 +31,7 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
   # - utmSource
   # - utmMedium
   # - utmCampaign
-  createUser = (options, callback) ->
+  createUser = (options, callback, onError) ->
     if options.handle && options.email && options.password
       userParams =
         params:
@@ -51,10 +51,9 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
         callback? response
 
       resource.$promise.catch (response) ->
-        console.log "catch" + response
+        onError? response
 
       resource.$promise.finally (response) ->
-        console.log "finally" + response
 
   $rootScope.$watch AuthService.isLoggedIn, ->
     currentUser = null

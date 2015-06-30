@@ -150,7 +150,6 @@
       request.then(function(response, status, headers, config) {
         auth.signout();
         TokenService.deleteToken();
-        $rootScope.$broadcast('logout');
         return loggedIn = false;
       });
       return request["catch"](function(message) {
@@ -175,11 +174,11 @@
       onError = function(err) {
         return options.error(err);
       };
-      onSuccess = function(profile, idToken, accessToken, state, refreshToken) {
-        return exchangeToken(idToken, refreshToken, options.success);
+      onSuccess = function(idToken, refreshToken) {
+        return exchangeToken(idToken, refreshToken, options != null ? options.success : void 0);
       };
       TokenService.deleteToken();
-      if (options.state) {
+      if (options != null ? options.state : void 0) {
         store.set('login-state', options.state);
       }
       return auth.signin(params, onSuccess, onError);
@@ -188,7 +187,6 @@
       var newAuth, onError, onSuccess, params;
       onSuccess = function(res) {
         TokenService.setToken(res.result.content.token);
-        $rootScope.$broadcast('authenticated');
         loggedIn = true;
         return typeof success === "function" ? success(res) : void 0;
       };
@@ -210,11 +208,11 @@
         var newToken;
         newToken = response.result.content.token;
         TokenService.setToken(newToken);
-        return $rootScope.$broadcast('authenticated');
+        return loggedIn = true;
       };
       onError = function(response) {
         TokenService.deleteToken();
-        return $rootScope.$broadcast('logout');
+        return loggedIn = false;
       };
       resource = AuthorizationsAPIService.get({
         id: 1
@@ -308,7 +306,7 @@
         return resource.$promise["finally"](function() {});
       }
     };
-    createUser = function(options, callback) {
+    createUser = function(options, callback, onError) {
       var resource, userParams;
       if (options.handle && options.email && options.password) {
         userParams = {
@@ -330,11 +328,9 @@
           return typeof callback === "function" ? callback(response) : void 0;
         });
         resource.$promise["catch"](function(response) {
-          return console.log("catch" + response);
+          return typeof onError === "function" ? onError(response) : void 0;
         });
-        return resource.$promise["finally"](function(response) {
-          return console.log("finally" + response);
-        });
+        return resource.$promise["finally"](function(response) {});
       }
     };
     $rootScope.$watch(AuthService.isLoggedIn, function() {
