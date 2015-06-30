@@ -88,8 +88,8 @@ AuthService = (
 
   isAuthenticated = ->
     if TokenService.tokenIsValid()
-     refreshToken() if TokenService.tokenIsExpired()
-     true
+      refreshToken() if TokenService.tokenIsExpired()
+      true
     else
       false
 

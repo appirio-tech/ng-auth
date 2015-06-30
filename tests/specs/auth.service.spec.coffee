@@ -5,6 +5,7 @@ deleteTokenSpy  = null
 wasCalled       = null
 setTokenSpy     = null
 tokenExpiredSpy = null
+isAuthed = null
 
 describe 'Authorization Service', ->
   beforeEach inject (AuthService) ->
@@ -88,11 +89,12 @@ describe 'Authorization Service', ->
   describe 'isAuthenticated method', ->
     beforeEach inject (TokenService) ->
       tokenExpiredSpy = sinon.spy TokenService, 'tokenIsExpired'
-      srv.isAuthenticated()
+      stubTokenValid  = sinon.stub(TokenService, 'tokenIsValid').returns true
+      isAuthed        = srv.isAuthenticated()
 
     afterEach ->
       tokenExpiredSpy.restore()
 
     it 'should have called TokenService.tokenIsExpired', ->
-      wasCalled = tokenExpiredSpy.calledOnce
-      expect(wasCalled).to.be.ok
+      wasCalled = tokenExpiredSpy.called
+      expect(isAuthed).to.be.ok
