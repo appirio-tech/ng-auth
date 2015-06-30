@@ -1,9 +1,10 @@
 'use strict'
 
-srv            = null
-deleteTokenSpy = null
-wasCalled      = null
-setTokenSpy    = null
+srv             = null
+deleteTokenSpy  = null
+wasCalled       = null
+setTokenSpy     = null
+tokenExpiredSpy = null
 
 describe 'Authorization Service', ->
   beforeEach inject (AuthService) ->
@@ -82,4 +83,16 @@ describe 'Authorization Service', ->
 
     it 'should have called TokenService.setToken', ->
       wasCalled = setTokenSpy.calledOnce
+      expect(wasCalled).to.be.ok
+
+  describe 'isAuthenticated method', ->
+    beforeEach inject (TokenService) ->
+      tokenExpiredSpy = sinon.spy TokenService, 'tokenIsExpired'
+      srv.isAuthenticated()
+
+    afterEach ->
+      tokenExpiredSpy.restore()
+
+    it 'should have called TokenService.tokenIsExpired', ->
+      wasCalled = tokenExpiredSpy.calledOnce
       expect(wasCalled).to.be.ok
