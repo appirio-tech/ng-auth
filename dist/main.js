@@ -290,21 +290,21 @@
       if (callback == null) {
         callback = null;
       }
-      if (currentUser) {
-        return currentUser;
+      if (!currentUser) {
+        decodedToken = TokenService.decodeToken();
+        if (decodedToken.userId) {
+          params = {
+            id: decodedToken.userId
+          };
+          resource = UserV3APIService.get(params);
+          resource.$promise.then(function(response) {
+            return currentUser = response;
+          });
+          resource.$promise["catch"](function() {});
+          resource.$promise["finally"](function() {});
+        }
       }
-      decodedToken = TokenService.decodeToken();
-      if (decodedToken.userId) {
-        params = {
-          id: decodedToken.userId
-        };
-        resource = UserV3APIService.get(params);
-        resource.$promise.then(function(response) {
-          return currentUser = response;
-        });
-        resource.$promise["catch"](function() {});
-        return resource.$promise["finally"](function() {});
-      }
+      return currentUser;
     };
     createUser = function(options, callback, onError) {
       var resource, userParams;

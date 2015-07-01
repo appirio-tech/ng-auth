@@ -4,22 +4,23 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
   currentUser = null
 
   getCurrentUser = (callback = null) ->
-    return currentUser if currentUser
+    unless currentUser
+      decodedToken = TokenService.decodeToken()
 
-    decodedToken = TokenService.decodeToken()
+      if decodedToken.userId
+        params =
+          id: decodedToken.userId
 
-    if decodedToken.userId
-      params =
-        id: decodedToken.userId
+        resource = UserV3APIService.get params
 
-      resource = UserV3APIService.get params
+        resource.$promise.then (response) ->
+          currentUser = response
 
-      resource.$promise.then (response) ->
-        currentUser = response
+        resource.$promise.catch ->
 
-      resource.$promise.catch ->
+        resource.$promise.finally ->
 
-      resource.$promise.finally ->
+    currentUser
 
   # Create a User
   # @param options - array with the following properties
