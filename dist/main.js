@@ -334,10 +334,14 @@
       }
     };
     $rootScope.$watch(AuthService.isLoggedIn, function() {
+      currentUser = null;
       if (AuthService.isLoggedIn()) {
         return loadUser();
       }
     });
+    if (AuthService.isAuthenticated()) {
+      loadUser();
+    }
     return {
       getCurrentUser: getCurrentUser,
       createUser: createUser

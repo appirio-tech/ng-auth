@@ -57,7 +57,10 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
       resource.$promise.finally (response) ->
 
   $rootScope.$watch AuthService.isLoggedIn, ->
+    currentUser = null
     loadUser() if AuthService.isLoggedIn()
+
+  loadUser() if AuthService.isAuthenticated()
 
   getCurrentUser: getCurrentUser
   createUser    : createUser
