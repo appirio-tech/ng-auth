@@ -40,7 +40,7 @@ AuthService = (
     onError = (err) ->
       options.error err
 
-    onSuccess = (profile, idToken, acces sToken, state, refreshToken) ->
+    onSuccess = (profile, idToken, accessToken, state, refreshToken) ->
       exchangeToken idToken, refreshToken, options?.success
 
     # First remove any old tokens
