@@ -20,7 +20,7 @@ describe 'UserV3 Service', ->
   it 'should have a createUser method', ->
     expect(srv.createUser).to.be.ok
 
-  describe 'getCurrentUser if AuthService.isLoggedIn', ->
+  describe 'loadUser if AuthService.isLoggedIn', ->
     beforeEach inject (AuthService, $rootScope, TokenService) ->
       isLoggedInStub = sinon.stub(AuthService, 'isLoggedIn').returns true
       decodeTokenSpy = sinon.spy TokenService, 'decodeToken'
@@ -30,23 +30,9 @@ describe 'UserV3 Service', ->
       isLoggedInStub.restore()
       decodeTokenSpy.restore()
 
-    it 'should call getCurrentUser method when AuthService.isLoggedIn', ->
+    it 'should call loadUser method when AuthService.isLoggedIn', ->
       wasCalled = decodeTokenSpy.calledOnce
       expect(wasCalled).to.be.ok
-
-  describe 'getCurrentUser method', ->
-    beforeEach inject ($httpBackend, TokenService) ->
-      stubToken = sinon.stub TokenService, 'decodeToken'
-
-      stubToken.returns userId: '123'
-
-      currentUser = srv.getCurrentUser()
-
-    afterEach ->
-      stubToken.restore()
-
-    it 'should have some results', ->
-      expect(currentUser).to.be.ok
 
   describe 'createUser method', ->
     beforeEach inject ($httpBackend) ->

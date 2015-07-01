@@ -283,27 +283,27 @@
   var srv;
 
   srv = function(UserV3APIService, TokenService, AuthService, $rootScope) {
-    var createUser, currentUser, getCurrentUser;
+    var createUser, currentUser, getCurrentUser, loadUser;
     currentUser = null;
-    getCurrentUser = function(callback) {
+    loadUser = function(callback) {
       var decodedToken, params, resource;
       if (callback == null) {
         callback = null;
       }
-      if (!currentUser) {
-        decodedToken = TokenService.decodeToken();
-        if (decodedToken.userId) {
-          params = {
-            id: decodedToken.userId
-          };
-          resource = UserV3APIService.get(params);
-          resource.$promise.then(function(response) {
-            return currentUser = response;
-          });
-          resource.$promise["catch"](function() {});
-          resource.$promise["finally"](function() {});
-        }
+      decodedToken = TokenService.decodeToken();
+      if (decodedToken.userId) {
+        params = {
+          id: decodedToken.userId
+        };
+        resource = UserV3APIService.get(params);
+        resource.$promise.then(function(response) {
+          return currentUser = response;
+        });
+        resource.$promise["catch"](function() {});
+        return resource.$promise["finally"](function() {});
       }
+    };
+    getCurrentUser = function() {
       return currentUser;
     };
     createUser = function(options, callback, onError) {
@@ -334,9 +334,8 @@
       }
     };
     $rootScope.$watch(AuthService.isLoggedIn, function() {
-      currentUser = null;
       if (AuthService.isLoggedIn()) {
-        return getCurrentUser();
+        return loadUser();
       }
     });
     return {

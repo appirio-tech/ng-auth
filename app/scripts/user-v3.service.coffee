@@ -3,23 +3,23 @@
 srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
   currentUser = null
 
-  getCurrentUser = (callback = null) ->
-    unless currentUser
-      decodedToken = TokenService.decodeToken()
+  loadUser = (callback = null) ->
+    decodedToken = TokenService.decodeToken()
 
-      if decodedToken.userId
-        params =
-          id: decodedToken.userId
+    if decodedToken.userId
+      params =
+        id: decodedToken.userId
 
-        resource = UserV3APIService.get params
+      resource = UserV3APIService.get params
 
-        resource.$promise.then (response) ->
-          currentUser = response
+      resource.$promise.then (response) ->
+        currentUser = response
 
-        resource.$promise.catch ->
+      resource.$promise.catch ->
 
-        resource.$promise.finally ->
+      resource.$promise.finally ->
 
+  getCurrentUser = ->
     currentUser
 
   # Create a User
@@ -57,8 +57,7 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
       resource.$promise.finally (response) ->
 
   $rootScope.$watch AuthService.isLoggedIn, ->
-    currentUser = null
-    getCurrentUser() if AuthService.isLoggedIn()
+    loadUser() if AuthService.isLoggedIn()
 
   getCurrentUser: getCurrentUser
   createUser    : createUser
