@@ -321,7 +321,7 @@
             }
           }
         };
-        resource = UserV3APIService.save(userParams);
+        resource = UserV3APIService.post(userParams);
         resource.$promise.then(function(response) {
           return typeof callback === "function" ? callback(response) : void 0;
         });
