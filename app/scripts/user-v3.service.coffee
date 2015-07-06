@@ -35,7 +35,7 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
   createUser = (options, callback, onError) ->
     if options.handle && options.email && options.password
       userParams =
-        params:
+        param:
           handle     : options.handle
           email      : options.email
           utmSource  : options.utmSource || 'asp'

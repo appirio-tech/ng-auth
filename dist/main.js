@@ -313,7 +313,7 @@
       var resource, userParams;
       if (options.handle && options.email && options.password) {
         userParams = {
-          params: {
+          param: {
             handle: options.handle,
             email: options.email,
             utmSource: options.utmSource || 'asp',
