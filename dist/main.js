@@ -139,14 +139,18 @@
   var AuthService;
 
   AuthService = function($rootScope, AuthorizationsAPIService, auth, store, TokenService, $state) {
-    var exchangeToken, isAuthenticated, login, logout, refreshToken;
+    var exchangeToken, isAuthenticated, isLoggedIn, loggedIn, login, logout, refreshToken;
+    loggedIn = false;
+    isLoggedIn = function() {
+      return loggedIn;
+    };
     logout = function() {
       var request;
       request = AuthorizationsAPIService.remove().$promise;
       request.then(function(response, status, headers, config) {
         auth.signout();
         TokenService.deleteToken();
-        return $rootScope.$broadcast('logout');
+        return loggedIn = false;
       });
       return request["catch"](function(message) {
         return $state.reload();
@@ -171,10 +175,10 @@
         return options.error(err);
       };
       onSuccess = function(profile, idToken, accessToken, state, refreshToken) {
-        return exchangeToken(idToken, refreshToken, options.success);
+        return exchangeToken(idToken, refreshToken, options != null ? options.success : void 0);
       };
       TokenService.deleteToken();
-      if (options.state) {
+      if (options != null ? options.state : void 0) {
         store.set('login-state', options.state);
       }
       return auth.signin(params, onSuccess, onError);
@@ -183,7 +187,7 @@
       var newAuth, onError, onSuccess, params;
       onSuccess = function(res) {
         TokenService.setToken(res.result.content.token);
-        $rootScope.$broadcast('authenticated');
+        loggedIn = true;
         return typeof success === "function" ? success(res) : void 0;
       };
       onError = function(res) {
@@ -204,11 +208,11 @@
         var newToken;
         newToken = response.result.content.token;
         TokenService.setToken(newToken);
-        return $rootScope.$broadcast('authenticated');
+        return loggedIn = true;
       };
       onError = function(response) {
         TokenService.deleteToken();
-        return $rootScope.$broadcast('logout');
+        return loggedIn = false;
       };
       resource = AuthorizationsAPIService.get({
         id: 1
@@ -229,6 +233,7 @@
     return {
       login: login,
       logout: logout,
+      isLoggedIn: isLoggedIn,
       isAuthenticated: isAuthenticated,
       exchangeToken: exchangeToken,
       refreshToken: refreshToken
@@ -262,6 +267,9 @@
         method: 'GET',
         isArray: false,
         transformResponse: transformResponse
+      },
+      post: {
+        method: 'POST'
       }
     };
     return $resource(url, params, actions);
@@ -277,10 +285,14 @@
   'use strict';
   var srv;
 
-  srv = function(UserV3APIService, TokenService) {
-    var getCurrentUser;
-    getCurrentUser = function(callback) {
+  srv = function(UserV3APIService, TokenService, AuthService, $rootScope) {
+    var createUser, currentUser, getCurrentUser, loadUser;
+    currentUser = null;
+    loadUser = function(callback) {
       var decodedToken, params, resource;
+      if (callback == null) {
+        callback = null;
+      }
       decodedToken = TokenService.decodeToken();
       if (decodedToken.userId) {
         params = {
@@ -288,18 +300,58 @@
         };
         resource = UserV3APIService.get(params);
         resource.$promise.then(function(response) {
-          return typeof callback === "function" ? callback(response) : void 0;
+          return currentUser = response;
         });
         resource.$promise["catch"](function() {});
         return resource.$promise["finally"](function() {});
       }
     };
+    getCurrentUser = function() {
+      return currentUser;
+    };
+    createUser = function(options, callback, onError) {
+      var resource, userParams;
+      if (options.handle && options.email && options.password) {
+        userParams = {
+          param: {
+            handle: options.handle,
+            email: options.email,
+            utmSource: options.utmSource || 'asp',
+            utmMedium: options.utmMedium || '',
+            utmCampaign: options.utmCampaign || '',
+            firstName: options.firstname || '',
+            lastName: options.lastname || '',
+            credential: {
+              password: options.password
+            }
+          }
+        };
+        resource = UserV3APIService.post(userParams);
+        resource.$promise.then(function(response) {
+          return typeof callback === "function" ? callback(response) : void 0;
+        });
+        resource.$promise["catch"](function(response) {
+          return typeof onError === "function" ? onError(response) : void 0;
+        });
+        return resource.$promise["finally"](function(response) {});
+      }
+    };
+    $rootScope.$watch(AuthService.isLoggedIn, function() {
+      currentUser = null;
+      if (AuthService.isLoggedIn()) {
+        return loadUser();
+      }
+    });
+    if (AuthService.isAuthenticated()) {
+      loadUser();
+    }
     return {
-      getCurrentUser: getCurrentUser
+      getCurrentUser: getCurrentUser,
+      createUser: createUser
     };
   };
 
-  srv.$inject = ['UserV3APIService', 'TokenService'];
+  srv.$inject = ['UserV3APIService', 'TokenService', 'AuthService', '$rootScope'];
 
   angular.module('appirio-tech-ng-auth').factory('UserV3Service', srv);
 
