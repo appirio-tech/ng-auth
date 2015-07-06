@@ -268,8 +268,8 @@
         isArray: false,
         transformResponse: transformResponse
       },
-      put: {
-        method: 'PUT'
+      post: {
+        method: 'POST'
       }
     };
     return $resource(url, params, actions);

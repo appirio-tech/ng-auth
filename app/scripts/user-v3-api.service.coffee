@@ -17,8 +17,8 @@ srv = ($resource, API_URL) ->
       isArray          : false
       transformResponse: transformResponse
 
-    put:
-      method: 'PUT'
+    post:
+      method: 'POST'
 
    $resource url, params, actions
 
