@@ -46,7 +46,7 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
           credential :
             password: options.password
 
-      resource = UserV3APIService.create userParams
+      resource = UserV3APIService.put userParams
 
       resource.$promise.then (response) ->
         callback? response

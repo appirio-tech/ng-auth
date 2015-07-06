@@ -267,6 +267,9 @@
         method: 'GET',
         isArray: false,
         transformResponse: transformResponse
+      },
+      put: {
+        method: 'PUT'
       }
     };
     return $resource(url, params, actions);
@@ -321,7 +324,7 @@
             }
           }
         };
-        resource = UserV3APIService.create(userParams);
+        resource = UserV3APIService.put(userParams);
         resource.$promise.then(function(response) {
           return typeof callback === "function" ? callback(response) : void 0;
         });
