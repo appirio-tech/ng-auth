@@ -41,8 +41,8 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
           utmSource  : options.utmSource || 'asp'
           utmMedium  : options.utmMedium || ''
           utmCampaign: options.utmCampaign || ''
-          firstName  : options.firstname
-          lastName   : options.lastname
+          firstName  : options.firstname || ''
+          lastName   : options.lastname || ''
           credential :
             password: options.password
 
