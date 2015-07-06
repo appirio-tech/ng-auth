@@ -42,24 +42,6 @@ describe 'Authorization Service', ->
       wasCalled = deleteTokenSpy.called
       expect(wasCalled).to.be.ok
 
-  # describe 'login method', ->
-  #   beforeEach inject (TokenService) ->
-  #     deleteTokenSpy = sinon.spy TokenService, 'deleteToken'
-  #     options =
-  #       username: 'abc'
-  #       password: '123'
-  #       success : true
-  #       state   : true
-
-  #     srv.login(options)
-
-  #   afterEach ->
-  #     deleteTokenSpy.restore()
-
-  #   it 'should have called TokenService.deleteToken', ->
-  #     wasCalled = deleteTokenSpy.called
-  #     expect(wasCalled).to.be.ok
-
   describe 'exchangeToken method', ->
     beforeEach inject ($httpBackend, TokenService) ->
       setTokenSpy  = sinon.spy TokenService, 'setToken'
