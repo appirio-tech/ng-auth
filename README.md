@@ -42,3 +42,18 @@ controller = -> ($scope, AuthService)
 
     AuthService.login loginOptions
 ```
+
+### Check if user is logged in
+```
+isLoggedIn = AuthService.isLoggedIn
+```
+
+### Get current user
+``` coffeescript
+
+controller = -> ($scope, UserV3Service)
+  vm = this
+  scope.$watch UserV3Service.getCurrentUser, ->
+    user = UserV3Service.getCurrentUser()
+    vm.user = user if user
+```
