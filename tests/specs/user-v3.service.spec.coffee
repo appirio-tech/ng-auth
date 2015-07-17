@@ -37,14 +37,15 @@ describe 'UserV3 Service', ->
   describe 'createUser method', ->
     beforeEach inject ($httpBackend) ->
       userData =
-        handle     : 'Batman'
-        password   : 'secret'
-        email      : 'promero@appirio.com'
-        firstName  : 'batman'
-        lastName   : 'potter'
-        utmSource  : 'asp'
-        utmMedium  : ''
-        utmCampaign: ''
+        handle            : 'Batman'
+        password          : 'secret'
+        email             : 'promero@appirio.com'
+        firstName         : 'batman'
+        lastName          : 'potter'
+        utmSource         : 'asp'
+        utmMedium         : ''
+        utmCampaign       : ''
+        afterActivationURL: 'http://i.imgur.com/sil2GBF.png'
 
       srv.createUser userData, (response) ->
         success = response
