@@ -32,7 +32,7 @@ controller = -> ($scope, AuthService)
 
   onError = ->
     console.log 'log in failed'
- 
+
   $scope.login = ->
     loginOptions =
       username: $scope.username
