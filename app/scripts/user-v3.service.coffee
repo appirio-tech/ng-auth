@@ -46,6 +46,10 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
           credential :
             password: options.password
 
+      if options.afterActivationURL
+        userParams.options =
+          afterActivationURL: options.afterActivationURL
+
       resource = UserV3APIService.post userParams
 
       resource.$promise.then (response) ->
