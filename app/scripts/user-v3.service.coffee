@@ -19,19 +19,10 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
 
       resource.$promise.finally ->
 
+  # This method should be very high performance since many things will be watching it.
   getCurrentUser = ->
     currentUser
 
-  # Create a User
-  # @param options - array with the following properties
-  # - handle
-  # - password
-  # - email
-  # - firstname
-  # - lastname
-  # - utmSource
-  # - utmMedium
-  # - utmCampaign
   createUser = (options, callback, onError) ->
     if options.handle && options.email && options.password
       userParams =

@@ -6,7 +6,6 @@ AuthService = (
   auth
   store
   TokenService
-  $state
 ) ->
   loggedIn = false
 
@@ -14,14 +13,16 @@ AuthService = (
     loggedIn
 
   logout = ->
+    auth.signout()
+    TokenService.deleteToken()
+    loggedIn = false
+
     request = AuthorizationsAPIService.remove().$promise
     request.then (response, status, headers, config) ->
-      auth.signout()
-      TokenService.deleteToken()
-      loggedIn = false
+      # do something
 
     request.catch (message) ->
-      $state.reload()
+      # do something
 
   login = (options) ->
     defaultOptions =
@@ -106,7 +107,6 @@ AuthService.$inject = [
  'auth'
  'store'
  'TokenService'
- '$state'
 ]
 
 angular.module('appirio-tech-ng-auth').factory 'AuthService', AuthService
