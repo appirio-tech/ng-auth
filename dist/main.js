@@ -138,7 +138,7 @@
   'use strict';
   var AuthService;
 
-  AuthService = function($rootScope, AuthorizationsAPIService, auth, store, TokenService, $state) {
+  AuthService = function($rootScope, AuthorizationsAPIService, auth, store, TokenService) {
     var exchangeToken, isAuthenticated, isLoggedIn, loggedIn, login, logout, refreshToken;
     loggedIn = false;
     isLoggedIn = function() {
@@ -146,15 +146,12 @@
     };
     logout = function() {
       var request;
+      auth.signout();
+      TokenService.deleteToken();
+      loggedIn = false;
       request = AuthorizationsAPIService.remove().$promise;
-      request.then(function(response, status, headers, config) {
-        auth.signout();
-        TokenService.deleteToken();
-        return loggedIn = false;
-      });
-      return request["catch"](function(message) {
-        return $state.reload();
-      });
+      request.then(function(response, status, headers, config) {});
+      return request["catch"](function(message) {});
     };
     login = function(options) {
       var defaultOptions, lOptions, onError, onSuccess, params;
@@ -240,7 +237,7 @@
     };
   };
 
-  AuthService.$inject = ['$rootScope', 'AuthorizationsAPIService', 'auth', 'store', 'TokenService', '$state'];
+  AuthService.$inject = ['$rootScope', 'AuthorizationsAPIService', 'auth', 'store', 'TokenService'];
 
   angular.module('appirio-tech-ng-auth').factory('AuthService', AuthService);
 
