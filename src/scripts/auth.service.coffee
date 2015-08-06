@@ -15,9 +15,11 @@ AuthService = (
   logout = ->
     auth.signout()
     TokenService.deleteToken()
-    loggedIn = false
+    TokenService.deleteRefreshToken()
 
-    request = AuthorizationsAPIService.remove().$promise
+    loggedIn = false
+    request  = AuthorizationsAPIService.remove().$promise
+
     request.then (response, status, headers, config) ->
       # do something
 
@@ -52,6 +54,8 @@ AuthService = (
     auth.signin params, onSuccess, onError
 
   exchangeToken = (idToken, refreshToken, success, error) ->
+    TokenService.storeRefreshToken refreshToken
+
     onSuccess = (res) ->
       TokenService.setToken res.result.content.token
       loggedIn = true
@@ -70,22 +74,27 @@ AuthService = (
 
     newAuth.$save onSuccess, onError
 
-  refreshToken = ->
-    onSuccess = (response) ->
-      newToken = response.result.content.token
+  refreshToken = (onSuccess = nil) ->
+    token = TokenService.getRefreshToken()
 
-      TokenService.setToken newToken
-      loggedIn = true
+    if token
+      promise = auth.refreshIdToken token
 
-    onError = (response) ->
-      TokenService.deleteToken()
-      loggedIn = false
+      promise.then (response) ->
+        TokenService.setToken response
 
-    resource = AuthorizationsAPIService.get(id: 1).$promise
+        resource = AuthorizationsAPIService.get(id: 1).$promise
 
-    resource.then onSuccess
+        resource.then (response) ->
+          loggedIn = true
 
-    resource.catch onError
+          onSuccess?()
+
+        resource.catch (response) ->
+          logout()
+
+        promise.catch (response) ->
+          logout()
 
   isAuthenticated = ->
     if TokenService.tokenIsValid()
