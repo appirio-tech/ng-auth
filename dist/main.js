@@ -136,11 +136,12 @@
         promise = auth.refreshIdToken(token);
         return promise.then(function(response) {
           var resource;
-          TokenService.setToken(response);
           resource = AuthorizationsAPIService.get({
             id: 1
           }).$promise;
           resource.then(function(response) {
+            var ref, ref1;
+            TokenService.setToken(response != null ? (ref = response.result) != null ? (ref1 = ref.content) != null ? ref1.token : void 0 : void 0 : void 0);
             loggedIn = true;
             return typeof onSuccess === "function" ? onSuccess() : void 0;
           });

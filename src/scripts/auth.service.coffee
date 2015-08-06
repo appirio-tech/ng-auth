@@ -81,11 +81,11 @@ AuthService = (
       promise = auth.refreshIdToken token
 
       promise.then (response) ->
-        TokenService.setToken response
-
         resource = AuthorizationsAPIService.get(id: 1).$promise
 
         resource.then (response) ->
+          TokenService.setToken response?.result?.content?.token
+
           loggedIn = true
 
           onSuccess?()
