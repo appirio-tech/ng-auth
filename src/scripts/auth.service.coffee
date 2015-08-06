@@ -74,7 +74,7 @@ AuthService = (
 
     newAuth.$save onSuccess, onError
 
-  refreshToken = (onSuccess = nil) ->
+  refreshToken = (onSuccess = null) ->
     token = TokenService.getRefreshToken()
 
     if token

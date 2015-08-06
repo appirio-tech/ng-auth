@@ -129,7 +129,7 @@
     refreshToken = function(onSuccess) {
       var promise, token;
       if (onSuccess == null) {
-        onSuccess = nil;
+        onSuccess = null;
       }
       token = TokenService.getRefreshToken();
       if (token) {
