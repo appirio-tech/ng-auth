@@ -7,7 +7,7 @@ AuthService = (
   store
   TokenService
 ) ->
-  loggedIn = false
+  loggedIn = null
 
   isLoggedIn = ->
     loggedIn
@@ -93,6 +93,8 @@ AuthService = (
       true
     else
       false
+
+  loggedIn = isAuthenticated()
 
   login          : login
   logout         : logout

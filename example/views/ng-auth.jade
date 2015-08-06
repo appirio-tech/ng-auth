@@ -2,8 +2,30 @@ button.success(ng-click="vm.login()") login
 
 hr
 
-button.danger(ng-click="vm.login()") logout
+button.danger(ng-click="vm.logout()") logout
 
 hr
 
+button.info(ng-click="vm.isLoggedIn()") isLoggedIn
+
+hr
+
+button.info(ng-click="vm.isAuthenticated()") isAuthenticated
+
+hr
+
+label callbacks:
+
 p {{ vm.message }}
+
+hr
+
+label token:
+
+p {{ vm.token }}
+
+hr
+
+label reset token:
+
+p {{ vm.resetToken }}
