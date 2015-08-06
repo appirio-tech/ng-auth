@@ -39,7 +39,7 @@ AuthService = (
         scope: 'openid profile offline_access'
 
     onError = (err) ->
-      options.error err
+      options?.error? err
 
     onSuccess = (profile, idToken, accessToken, state, refreshToken) ->
       exchangeToken idToken, refreshToken, options?.success
