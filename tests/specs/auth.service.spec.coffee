@@ -85,6 +85,7 @@ describe 'Authorization Service', ->
 
     it 'should have called TokenService.setToken', ->
       # currently, dont know why promise isnt being fullfilled
+      # TODO: make this test work
       wasCalled = setTokenSpy.calledOnce || true
       expect(wasCalled).to.be.ok
 
