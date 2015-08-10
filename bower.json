@@ -2,6 +2,7 @@
   "name": "appirio-tech-ng-auth",
   "version": "0.0.2",
   "description": "Appiro Work Platform",
+  "main": "./dist/main.js",
   "authors": [
     ""
   ],

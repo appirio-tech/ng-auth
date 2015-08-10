@@ -61,6 +61,128 @@
 
 (function() {
   'use strict';
+  var AuthService;
+
+  AuthService = function($rootScope, AuthorizationsAPIService, auth, store, TokenService) {
+    var exchangeToken, isAuthenticated, isLoggedIn, loggedIn, login, logout, refreshToken;
+    loggedIn = null;
+    isLoggedIn = function() {
+      return loggedIn;
+    };
+    logout = function() {
+      var request;
+      auth.signout();
+      TokenService.deleteToken();
+      TokenService.deleteRefreshToken();
+      loggedIn = false;
+      request = AuthorizationsAPIService.remove().$promise;
+      request.then(function(response, status, headers, config) {});
+      return request["catch"](function(message) {});
+    };
+    login = function(options) {
+      var defaultOptions, lOptions, onError, onSuccess, params;
+      defaultOptions = {
+        retUrl: '/'
+      };
+      lOptions = angular.extend({}, options, defaultOptions);
+      params = {
+        username: lOptions.username,
+        password: lOptions.password,
+        sso: false,
+        connection: 'LDAP',
+        authParams: {
+          scope: 'openid profile offline_access'
+        }
+      };
+      onError = function(err) {
+        return options != null ? typeof options.error === "function" ? options.error(err) : void 0 : void 0;
+      };
+      onSuccess = function(profile, idToken, accessToken, state, refreshToken) {
+        return exchangeToken(idToken, refreshToken, options != null ? options.success : void 0);
+      };
+      TokenService.deleteToken();
+      if (options != null ? options.state : void 0) {
+        store.set('login-state', options.state);
+      }
+      return auth.signin(params, onSuccess, onError);
+    };
+    exchangeToken = function(idToken, refreshToken, success, error) {
+      var newAuth, onError, onSuccess, params;
+      TokenService.storeRefreshToken(refreshToken);
+      onSuccess = function(res) {
+        TokenService.setToken(res.result.content.token);
+        loggedIn = true;
+        return typeof success === "function" ? success(res) : void 0;
+      };
+      onError = function(res) {
+        return typeof error === "function" ? error(res) : void 0;
+      };
+      params = {
+        param: {
+          refreshToken: refreshToken,
+          externalToken: idToken
+        }
+      };
+      newAuth = new AuthorizationsAPIService(params);
+      return newAuth.$save(onSuccess, onError);
+    };
+    refreshToken = function(onSuccess) {
+      var promise, token;
+      if (onSuccess == null) {
+        onSuccess = null;
+      }
+      token = TokenService.getRefreshToken();
+      if (token) {
+        promise = auth.refreshIdToken(token);
+        return promise.then(function(response) {
+          var resource;
+          resource = AuthorizationsAPIService.get({
+            id: 1
+          }).$promise;
+          resource.then(function(response) {
+            var ref, ref1;
+            TokenService.setToken(response != null ? (ref = response.result) != null ? (ref1 = ref.content) != null ? ref1.token : void 0 : void 0 : void 0);
+            loggedIn = true;
+            return typeof onSuccess === "function" ? onSuccess() : void 0;
+          });
+          resource["catch"](function(response) {
+            return logout();
+          });
+          return promise["catch"](function(response) {
+            return logout();
+          });
+        });
+      }
+    };
+    isAuthenticated = function() {
+      if (TokenService.tokenIsValid()) {
+        if (TokenService.tokenIsExpired()) {
+          refreshToken();
+        }
+        return true;
+      } else {
+        return false;
+      }
+    };
+    loggedIn = isAuthenticated();
+    return {
+      login: login,
+      logout: logout,
+      isLoggedIn: isLoggedIn,
+      isAuthenticated: isAuthenticated,
+      exchangeToken: exchangeToken,
+      refreshToken: refreshToken
+    };
+  };
+
+  AuthService.$inject = ['$rootScope', 'AuthorizationsAPIService', 'auth', 'store', 'TokenService'];
+
+  angular.module('appirio-tech-ng-auth').factory('AuthService', AuthService);
+
+}).call(this);
+
+(function() {
+  'use strict';
   var srv;
 
   srv = function($resource, API_URL) {
@@ -82,16 +204,25 @@
   'use strict';
   var TokenService;
 
-  TokenService = function($rootScope, $http, store, AUTH0_TOKEN_NAME, jwtHelper) {
-    var decodeToken, deleteToken, getToken, setToken, tokenIsExpired, tokenIsValid;
+  TokenService = function($rootScope, $http, store, AUTH0_TOKEN_NAME, AUTH0_REFRESH_TOKEN_NAME, jwtHelper) {
+    var decodeToken, deleteRefreshToken, deleteToken, getRefreshToken, getToken, setToken, storeRefreshToken, tokenIsExpired, tokenIsValid;
     getToken = function() {
       return store.get(AUTH0_TOKEN_NAME);
     };
     setToken = function(token) {
       return store.set(AUTH0_TOKEN_NAME, token);
     };
+    storeRefreshToken = function(token) {
+      return store.set(AUTH0_REFRESH_TOKEN_NAME, token);
+    };
+    getRefreshToken = function(token) {
+      return store.get(AUTH0_REFRESH_TOKEN_NAME, token);
+    };
     deleteToken = function() {
       return store.remove(AUTH0_TOKEN_NAME);
+    };
+    deleteRefreshToken = function() {
+      return store.remove(AUTH0_REFRESH_TOKEN_NAME);
     };
     decodeToken = function() {
       var token;
@@ -124,122 +255,16 @@
       decodeToken: decodeToken,
       setToken: setToken,
       tokenIsValid: tokenIsValid,
-      tokenIsExpired: tokenIsExpired
+      tokenIsExpired: tokenIsExpired,
+      storeRefreshToken: storeRefreshToken,
+      getRefreshToken: getRefreshToken,
+      deleteRefreshToken: deleteRefreshToken
     };
   };
 
-  TokenService.$inject = ['$rootScope', '$http', 'store', 'AUTH0_TOKEN_NAME', 'jwtHelper'];
+  TokenService.$inject = ['$rootScope', '$http', 'store', 'AUTH0_TOKEN_NAME', 'AUTH0_REFRESH_TOKEN_NAME', 'jwtHelper'];
 
   angular.module('appirio-tech-ng-auth').factory('TokenService', TokenService);
-
-}).call(this);
-
-(function() {
-  'use strict';
-  var AuthService;
-
-  AuthService = function($rootScope, AuthorizationsAPIService, auth, store, TokenService) {
-    var exchangeToken, isAuthenticated, isLoggedIn, loggedIn, login, logout, refreshToken;
-    loggedIn = false;
-    isLoggedIn = function() {
-      return loggedIn;
-    };
-    logout = function() {
-      var request;
-      auth.signout();
-      TokenService.deleteToken();
-      loggedIn = false;
-      request = AuthorizationsAPIService.remove().$promise;
-      request.then(function(response, status, headers, config) {});
-      return request["catch"](function(message) {});
-    };
-    login = function(options) {
-      var defaultOptions, lOptions, onError, onSuccess, params;
-      defaultOptions = {
-        retUrl: '/'
-      };
-      lOptions = angular.extend({}, options, defaultOptions);
-      params = {
-        username: lOptions.username,
-        password: lOptions.password,
-        sso: false,
-        connection: 'LDAP',
-        authParams: {
-          scope: 'openid profile offline_access'
-        }
-      };
-      onError = function(err) {
-        return options.error(err);
-      };
-      onSuccess = function(profile, idToken, accessToken, state, refreshToken) {
-        return exchangeToken(idToken, refreshToken, options != null ? options.success : void 0);
-      };
-      TokenService.deleteToken();
-      if (options != null ? options.state : void 0) {
-        store.set('login-state', options.state);
-      }
-      return auth.signin(params, onSuccess, onError);
-    };
-    exchangeToken = function(idToken, refreshToken, success, error) {
-      var newAuth, onError, onSuccess, params;
-      onSuccess = function(res) {
-        TokenService.setToken(res.result.content.token);
-        loggedIn = true;
-        return typeof success === "function" ? success(res) : void 0;
-      };
-      onError = function(res) {
-        return typeof error === "function" ? error(res) : void 0;
-      };
-      params = {
-        param: {
-          refreshToken: refreshToken,
-          externalToken: idToken
-        }
-      };
-      newAuth = new AuthorizationsAPIService(params);
-      return newAuth.$save(onSuccess, onError);
-    };
-    refreshToken = function() {
-      var onError, onSuccess, resource;
-      onSuccess = function(response) {
-        var newToken;
-        newToken = response.result.content.token;
-        TokenService.setToken(newToken);
-        return loggedIn = true;
-      };
-      onError = function(response) {
-        TokenService.deleteToken();
-        return loggedIn = false;
-      };
-      resource = AuthorizationsAPIService.get({
-        id: 1
-      }).$promise;
-      resource.then(onSuccess);
-      return resource["catch"](onError);
-    };
-    isAuthenticated = function() {
-      if (TokenService.tokenIsValid()) {
-        if (TokenService.tokenIsExpired()) {
-          refreshToken();
-        }
-        return true;
-      } else {
-        return false;
-      }
-    };
-    return {
-      login: login,
-      logout: logout,
-      isLoggedIn: isLoggedIn,
-      isAuthenticated: isAuthenticated,
-      exchangeToken: exchangeToken,
-      refreshToken: refreshToken
-    };
-  };
-
-  AuthService.$inject = ['$rootScope', 'AuthorizationsAPIService', 'auth', 'store', 'TokenService'];
-
-  angular.module('appirio-tech-ng-auth').factory('AuthService', AuthService);
 
 }).call(this);
 

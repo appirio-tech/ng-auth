@@ -17,6 +17,7 @@ window.__karma__.loaded = ->
   AutoConfigFakeServer.fakeServer.respondImmediately = true
 
   schemas = [
+    FIXTURES['bower_components/appirio-tech-api-schemas/swagger/v2-oauth.json']
     FIXTURES['bower_components/appirio-tech-api-schemas/swagger/v3-users.json']
     FIXTURES['bower_components/appirio-tech-api-schemas/swagger/v3-events.json']
     FIXTURES['bower_components/appirio-tech-api-schemas/swagger/v2.json']

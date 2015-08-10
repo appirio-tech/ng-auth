@@ -1,0 +1,44 @@
+- var scripts  = []
+- var examples = ['constants', 'example.module', 'example-templates', 'routes', 'ng-auth.controller']
+- var bowers   = []
+
+
+- scripts.push('ng-auth.module')
+- scripts.push('auth.service')
+- scripts.push('authorizations-api.service')
+- scripts.push('token.service')
+- scripts.push('user-v3-api.service')
+- scripts.push('user-v3.service')
+
+- bowers.push('angular/angular')
+- bowers.push('angular-resource/angular-resource')
+- bowers.push('angular-ui-router/release/angular-ui-router')
+- bowers.push('a0-angular-storage/dist/angular-storage')
+- bowers.push('angular-jwt/dist/angular-jwt')
+- bowers.push('auth0.js/build/auth0')
+- bowers.push('auth0-angular/build/auth0-angular')
+
+= "\n"
+// build:js lib.js
+= "\n"
+each path in bowers
+  script(src="bower_components/#{path}.js", type="text/javascript")
+  = "\n"
+// endbuild
+= "\n"
+
+// build:js main.js
+= "\n"
+each path in scripts
+  script(src="scripts/#{path}.js", type="text/javascript")
+  = "\n"
+// endbuild
+= "\n"
+
+// build:js example.js
+= "\n"
+each path in examples
+  script(src="scripts/#{path}.js", type="text/javascript")
+  = "\n"
+// endbuild
+= "\n"
