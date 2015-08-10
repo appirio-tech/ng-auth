@@ -6,6 +6,10 @@ button.danger(ng-click="vm.logout()") logout
 
 hr
 
+button.warning(ng-click="vm.refreshToken()") refreshToken
+
+hr
+
 button.info(ng-click="vm.isLoggedIn()") isLoggedIn
 
 hr
@@ -26,6 +30,6 @@ p {{ vm.token }}
 
 hr
 
-label reset token:
+label refresh token:
 
-p {{ vm.resetToken }}
+p {{ vm.aRefreshToken }}

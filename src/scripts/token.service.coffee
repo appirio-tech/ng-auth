@@ -5,6 +5,7 @@ TokenService = (
   $http
   store
   AUTH0_TOKEN_NAME
+  AUTH0_REFRESH_TOKEN_NAME
   jwtHelper
 ) ->
   getToken = ->
@@ -14,8 +15,17 @@ TokenService = (
   setToken = (token) ->
     store.set AUTH0_TOKEN_NAME, token
 
+  storeRefreshToken = (token) ->
+    store.set AUTH0_REFRESH_TOKEN_NAME, token
+
+  getRefreshToken = (token) ->
+    store.get AUTH0_REFRESH_TOKEN_NAME, token
+
   deleteToken = ->
     store.remove AUTH0_TOKEN_NAME
+
+  deleteRefreshToken = ->
+    store.remove AUTH0_REFRESH_TOKEN_NAME
 
   decodeToken = ->
     token = getToken()
@@ -40,18 +50,22 @@ TokenService = (
 
     isString
 
-  getToken    : getToken
-  deleteToken : deleteToken
-  decodeToken : decodeToken
-  setToken    : setToken
-  tokenIsValid: tokenIsValid
-  tokenIsExpired: tokenIsExpired
+  getToken          : getToken
+  deleteToken       : deleteToken
+  decodeToken       : decodeToken
+  setToken          : setToken
+  tokenIsValid      : tokenIsValid
+  tokenIsExpired    : tokenIsExpired
+  storeRefreshToken : storeRefreshToken
+  getRefreshToken   : getRefreshToken
+  deleteRefreshToken: deleteRefreshToken
 
 TokenService.$inject = [
   '$rootScope'
   '$http'
   'store'
   'AUTH0_TOKEN_NAME'
+  'AUTH0_REFRESH_TOKEN_NAME'
   'jwtHelper'
 ]
 
