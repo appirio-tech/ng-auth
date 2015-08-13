@@ -187,7 +187,7 @@
 
   srv = function($resource, API_URL) {
     var params, url;
-    url = API_URL + '/authorizations/:id';
+    url = API_URL + '/v3/authorizations/:id';
     params = {
       id: '@id'
     };
@@ -280,7 +280,7 @@
 
   srv = function($resource, API_URL) {
     var actions, params, url;
-    url = API_URL + '/users/:id';
+    url = API_URL + '/v3/users/:id';
     params = {
       id: '@id'
     };
