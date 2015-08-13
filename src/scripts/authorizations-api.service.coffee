@@ -1,7 +1,7 @@
 'use strict'
 
 srv = ($resource, API_URL) ->
-  url     = API_URL + '/authorizations/:id'
+  url     = API_URL + '/v3/authorizations/:id'
   params  = id: '@id'
 
   $resource url, params
