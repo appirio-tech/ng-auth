@@ -3,7 +3,7 @@ AutoConfigFakeServer.init()
 AutoConfigFakeServer.fakeServer.autoRespond = true
 
 schemas = [
-  # 'bower_components/appirio-tech-api-schemas/swagger/v3-authorizations.json'
+  'bower_components/appirio-tech-api-schemas/swagger/v3-authorizations.json'
   'bower_components/appirio-tech-api-schemas/swagger/v2-oauth.json'
 ]
 
