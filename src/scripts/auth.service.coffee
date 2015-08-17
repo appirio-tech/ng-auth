@@ -57,7 +57,7 @@ AuthService = (
     TokenService.storeRefreshToken refreshToken
 
     onSuccess = (res) ->
-      TokenService.setToken res.result.content.token
+      TokenService.setToken res?.result?.content?.token
       loggedIn = true
 
       success?(res)

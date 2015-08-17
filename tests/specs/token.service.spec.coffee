@@ -58,8 +58,13 @@ describe 'Token Service', ->
 
   describe 'tokenIsValid method', ->
     context 'when token is not a string', ->
-      beforeEach ->
+      beforeEach inject (store) ->
+        stateGetStub = sinon.stub(store, 'get').returns null
+
         validToken = srv.tokenIsValid()
+
+      afterEach ->
+        stateGetStub.restore()
 
       it 'validToken should be false', ->
         expect(validToken).to.equal false
