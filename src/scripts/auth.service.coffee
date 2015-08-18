@@ -57,7 +57,7 @@ AuthService = (
     TokenService.storeRefreshToken refreshToken
 
     onSuccess = (res) ->
-      TokenService.setToken res.result.content.token
+      TokenService.setToken res?.result?.content?.token
       loggedIn = true
 
       success?(res)
@@ -98,8 +98,10 @@ AuthService = (
 
   isAuthenticated = ->
     if TokenService.tokenIsValid()
-      refreshToken() if TokenService.tokenIsExpired()
-      true
+      if TokenService.tokenIsExpired()
+        false
+      else
+        true
     else
       false
 
