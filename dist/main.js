@@ -110,7 +110,8 @@
       var newAuth, onError, onSuccess, params;
       TokenService.storeRefreshToken(refreshToken);
       onSuccess = function(res) {
-        TokenService.setToken(res.result.content.token);
+        var ref, ref1;
+        TokenService.setToken(res != null ? (ref = res.result) != null ? (ref1 = ref.content) != null ? ref1.token : void 0 : void 0 : void 0);
         loggedIn = true;
         return typeof success === "function" ? success(res) : void 0;
       };
@@ -157,9 +158,10 @@
     isAuthenticated = function() {
       if (TokenService.tokenIsValid()) {
         if (TokenService.tokenIsExpired()) {
-          refreshToken();
+          return false;
+        } else {
+          return true;
         }
-        return true;
       } else {
         return false;
       }
