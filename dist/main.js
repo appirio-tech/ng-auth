@@ -2,7 +2,7 @@
   'use strict';
   var config, dependencies, run;
 
-  dependencies = ['ngResource', 'app.constants', 'ui.router', 'angular-storage', 'angular-jwt', 'auth0'];
+  dependencies = ['ngResource', 'app.constants', 'ui.router', 'angular-storage', 'angular-jwt', 'auth0', 'appirio-tech-ng-api-services'];
 
   config = function($httpProvider, jwtInterceptorProvider, authProvider, AUTH0_DOMAIN, AUTH0_CLIENT_ID) {
     var jwtInterceptor, logout;
@@ -158,6 +158,7 @@
     isAuthenticated = function() {
       if (TokenService.tokenIsValid()) {
         if (TokenService.tokenIsExpired()) {
+          refreshToken();
           return false;
         } else {
           return true;
@@ -180,25 +181,6 @@
   AuthService.$inject = ['$rootScope', 'AuthorizationsAPIService', 'auth', 'store', 'TokenService'];
 
   angular.module('appirio-tech-ng-auth').factory('AuthService', AuthService);
-
-}).call(this);
-
-(function() {
-  'use strict';
-  var srv;
-
-  srv = function($resource, API_URL) {
-    var params, url;
-    url = API_URL + '/v3/authorizations/:id';
-    params = {
-      id: '@id'
-    };
-    return $resource(url, params);
-  };
-
-  srv.$inject = ['$resource', 'API_URL'];
-
-  angular.module('appirio-tech-ng-auth').factory('AuthorizationsAPIService', srv);
 
 }).call(this);
 
@@ -267,41 +249,6 @@
   TokenService.$inject = ['$rootScope', '$http', 'store', 'AUTH0_TOKEN_NAME', 'AUTH0_REFRESH_TOKEN_NAME', 'jwtHelper'];
 
   angular.module('appirio-tech-ng-auth').factory('TokenService', TokenService);
-
-}).call(this);
-
-(function() {
-  'use strict';
-  var srv, transformResponse;
-
-  transformResponse = function(response) {
-    var parsed, ref;
-    parsed = JSON.parse(response);
-    return (parsed != null ? (ref = parsed.result) != null ? ref.content : void 0 : void 0) || {};
-  };
-
-  srv = function($resource, API_URL) {
-    var actions, params, url;
-    url = API_URL + '/v3/users/:id';
-    params = {
-      id: '@id'
-    };
-    actions = {
-      get: {
-        method: 'GET',
-        isArray: false,
-        transformResponse: transformResponse
-      },
-      post: {
-        method: 'POST'
-      }
-    };
-    return $resource(url, params, actions);
-  };
-
-  srv.$inject = ['$resource', 'API_URL'];
-
-  angular.module('appirio-tech-ng-auth').factory('UserV3APIService', srv);
 
 }).call(this);
 
