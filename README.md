@@ -1,6 +1,8 @@
 # ng-auth
+[![GitHub version](https://badge.fury.io/gh/appirio-tech%2Fng-auth.svg)](http://badge.fury.io/gh/appirio-tech%2Fng-auth)
 [![Build Status](https://travis-ci.org/appirio-tech/ng-auth.svg)](https://travis-ci.org/appirio-tech/ng-auth)
 [![Coverage Status](https://coveralls.io/repos/appirio-tech/ng-auth/badge.svg?branch=master&t=HjoYus)](https://coveralls.io/r/appirio-tech/ng-auth?branch=master)
+[![Dependency Status](https://www.versioneye.com/user/projects/55d61cdb3b97d4001400029e/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55d61cdb3b97d4001400029e)
 
 ## Install
 ```

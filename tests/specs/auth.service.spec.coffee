@@ -100,4 +100,10 @@ describe 'Authorization Service', ->
 
     it 'should have called TokenService.tokenIsExpired', ->
       wasCalled = tokenExpiredSpy.called
-      expect(isAuthed).to.be.ok
+
+      expect(wasCalled).to.be.ok
+
+    it 'should return false', ->
+      expect(isAuthed).to.not.be.ok
+
+
