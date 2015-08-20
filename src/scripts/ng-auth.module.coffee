@@ -7,6 +7,7 @@ dependencies = [
   'angular-storage'
   'angular-jwt'
   'auth0'
+  'appirio-tech-ng-api-services'
 ]
 
 config = (
