@@ -1,15 +1,12 @@
 'use strict'
 
 TokenService = (
-  $rootScope
-  $http
   store
   AUTH0_TOKEN_NAME
   AUTH0_REFRESH_TOKEN_NAME
   jwtHelper
 ) ->
   getToken = ->
-    # the angular-store module takes care of the caching
     store.get AUTH0_TOKEN_NAME
 
   setToken = (token) ->
@@ -61,8 +58,6 @@ TokenService = (
   deleteRefreshToken: deleteRefreshToken
 
 TokenService.$inject = [
-  '$rootScope'
-  '$http'
   'store'
   'AUTH0_TOKEN_NAME'
   'AUTH0_REFRESH_TOKEN_NAME'

@@ -1,7 +1,6 @@
 'use strict'
 
 AuthService = (
-  $rootScope
   AuthorizationsAPIService
   auth
   store
@@ -117,7 +116,6 @@ AuthService = (
   refreshToken   : refreshToken
 
 AuthService.$inject = [
- '$rootScope'
  'AuthorizationsAPIService'
  'auth'
  'store'
