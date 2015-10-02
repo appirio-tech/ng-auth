@@ -17,10 +17,36 @@ config = (
   AUTH0_DOMAIN
   AUTH0_CLIENT_ID
 ) ->
-  jwtInterceptor = (TokenService) ->
-    TokenService.getToken()
+  refreshingToken = null
 
-  jwtInterceptor.$inject = ['TokenService']
+  jwtInterceptor = (TokenService, $http, API_URL) ->
+    currentToken = TokenService.getToken()
+
+    handleRefreshResponse = (res) ->
+      newToken = res.data?.result?.content?.token
+
+      TokenService.setToken newToken
+
+      newToken
+
+    refreshingTokenComplete = ->
+      refreshingToken = null
+
+    if TokenService.tokenIsValid() && TokenService.tokenIsExpired()
+      if refreshingToken == null
+        config =
+          method: 'GET'
+          url: "#{API_URL}/v3/authorizations/1"
+          headers:
+            'Authorization': "Bearer #{currentToken}"
+
+        refreshingToken = $http(config).then(handleRefreshResponse).finally(refreshingTokenComplete)
+
+      refreshingToken
+    else
+      currentToken
+
+  jwtInterceptor.$inject = ['TokenService', '$http', 'API_URL']
 
   jwtInterceptorProvider.tokenGetter = jwtInterceptor
 
@@ -38,35 +64,8 @@ config = (
 
   authProvider.on 'logout', logout
 
-run = (
-  $rootScope
-  $injector
-  $state
-  auth
-  TokenService
-  AuthService
-) ->
-
+run = (auth) ->
   auth.hookEvents()
-
-  checkRedirect = ->
-    isProtected = !toState.data || (toState.data && !toState.data.noAuthRequired)
-    notLoggedIn = !AuthService.isAuthenticated()
-    if isProtected && notLoggedIn
-      $rootScope.preAuthState = toState.name
-      event.preventDefault()
-      $state.go 'login'
-
-    # check if state requires auth
-  checkAuth = (event, toState) ->
-    isInvalidToken = TokenService.getToken() && !TokenService.tokenIsValid()
-    if isInvalidToken
-      AuthService.refreshToken().then ->
-        checkRedirect()
-    else
-      checkRedirect()
-
-    $rootScope.$on '$stateChangeStart', checkAuth
 
 config.$inject = [
   '$httpProvider'
@@ -77,12 +76,7 @@ config.$inject = [
 ]
 
 run.$inject = [
-  '$rootScope'
-  '$injector'
-  '$state'
   'auth'
-  'TokenService'
-  'AuthService'
 ]
 
 angular.module('appirio-tech-ng-auth', dependencies).config(config).run run
