@@ -19,34 +19,22 @@ config = (
 ) ->
   refreshingToken = null
 
-  jwtInterceptor = (TokenService, $http, API_URL) ->
-    currentToken = TokenService.getToken()
-
-    handleRefreshResponse = (res) ->
-      newToken = res.data?.result?.content?.token
-
-      TokenService.setToken newToken
-
-      newToken
-
+  jwtInterceptor = (TokenService, AuthService) ->
     refreshingTokenComplete = ->
       refreshingToken = null
 
-    if TokenService.tokenIsValid() && TokenService.tokenIsExpired()
-      if refreshingToken == null
-        config =
-          method: 'GET'
-          url: "#{API_URL}/v3/authorizations/1"
-          headers:
-            'Authorization': "Bearer #{currentToken}"
+    if TokenService.tokenIsValid()
+      if TokenService.tokenIsExpired()
+        if refreshingToken == null
+          refreshingToken = AuthService.exchangeToken().finally(refreshingTokenComplete)
 
-        refreshingToken = $http(config).then(handleRefreshResponse).finally(refreshingTokenComplete)
-
-      refreshingToken
+        refreshingToken
+      else
+        TokenService.getToken()
     else
-      currentToken
+      ''
 
-  jwtInterceptor.$inject = ['TokenService', '$http', 'API_URL']
+  jwtInterceptor.$inject = ['TokenService', 'AuthService']
 
   jwtInterceptorProvider.tokenGetter = jwtInterceptor
 

@@ -5,27 +5,25 @@ AuthService = (
   auth
   store
   TokenService
+  $q
 ) ->
-  loggedIn = null
+  loggedIn = TokenService.tokenIsValid()
 
   isLoggedIn = ->
     loggedIn
 
   logout = ->
-    auth.signout()
-    TokenService.deleteToken()
-    TokenService.deleteRefreshToken()
-
     loggedIn = false
-    request  = AuthorizationsAPIService.remove().$promise
 
-    request.then (response, status, headers, config) ->
-      # do something
+    auth.signout()
+    TokenService.deleteAllTokens()
 
-    request.catch (message) ->
-      # do something
+    AuthorizationsAPIService.remove().$promise
 
-  login = (options) ->
+  # Currently Auth0
+  externalLogin = (options) ->
+    deferred       = $q.defer()
+
     defaultOptions =
       retUrl: '/'
 
@@ -39,87 +37,56 @@ AuthService = (
       authParams:
         scope: 'openid profile offline_access'
 
-    onError = (err) ->
-      options?.error? err
+    signinError = (err) ->
+      deferred.reject(err)
 
-    onSuccess = (profile, idToken, accessToken, state, refreshToken) ->
-      exchangeToken idToken, refreshToken, options?.success
+    signinSuccess = (profile, idToken, accessToken, state, refreshToken) ->
+      TokenService.setExternalToken idToken
+      TokenService.setRefreshToken refreshToken
+      deferred.resolve()
 
-    # First remove any old tokens
-    TokenService.deleteToken()
+    auth.signin params, signinSuccess, signinError
 
-    store.set 'login-state', options.state if options?.state
+    deferred.promise
 
-    auth.signin params, onSuccess, onError
-
-  exchangeToken = (idToken, refreshToken, success, error) ->
-    TokenService.storeRefreshToken refreshToken
-
-    onSuccess = (res) ->
-      TokenService.setToken res?.result?.content?.token
-      loggedIn = true
-
-      success?(res)
-
-    onError = (res) ->
-      error?(res)
+  exchangeToken = ->
+    console.log 'exchanging:'
+    console.log TokenService.getRefreshToken()
+    console.log 'AND'
+    console.log TokenService.getExternalToken()
 
     params =
       param:
-        refreshToken: refreshToken
-        externalToken: idToken
+        refreshToken: TokenService.getRefreshToken()
+        externalToken: TokenService.getExternalToken()
 
     newAuth = new AuthorizationsAPIService params
 
-    newAuth.$save onSuccess, onError
+    newAuth.$save().then (res) ->
+      newToken = res.result?.content?.token
+      loggedIn = true
 
-  refreshToken = (onSuccess = null) ->
-    token = TokenService.getRefreshToken()
+      TokenService.setToken newToken
 
-    if token
-      promise = auth.refreshIdToken token
+      newToken
 
-      promise.then (response) ->
-        resource = AuthorizationsAPIService.get(id: 1).$promise
-
-        resource.then (response) ->
-          TokenService.setToken response?.result?.content?.token
-
-          loggedIn = true
-
-          onSuccess?()
-
-        resource.catch (response) ->
-          logout()
-
-        promise.catch (response) ->
-          logout()
-
-  isAuthenticated = ->
-    if TokenService.tokenIsValid()
-      if TokenService.tokenIsExpired()
-        refreshToken()
-
-        false
-      else
-        true
-    else
-      false
-
-  loggedIn = isAuthenticated()
+  login = (options) ->
+    externalLogin(options).then ->
+      TokenService.deleteToken()
+      # store.set 'login-state', options.state if options?.state
+      exchangeToken()
 
   login          : login
   logout         : logout
   isLoggedIn     : isLoggedIn
-  isAuthenticated: isAuthenticated
   exchangeToken  : exchangeToken
-  refreshToken   : refreshToken
 
 AuthService.$inject = [
  'AuthorizationsAPIService'
  'auth'
  'store'
  'TokenService'
+  '$q'
 ]
 
 angular.module('appirio-tech-ng-auth').factory 'AuthService', AuthService
