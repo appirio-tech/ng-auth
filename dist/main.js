@@ -5,11 +5,37 @@
   dependencies = ['ngResource', 'app.constants', 'ui.router', 'angular-storage', 'angular-jwt', 'auth0', 'appirio-tech-ng-api-services'];
 
   config = function($httpProvider, jwtInterceptorProvider, authProvider, AUTH0_DOMAIN, AUTH0_CLIENT_ID) {
-    var jwtInterceptor, logout;
-    jwtInterceptor = function(TokenService) {
-      return TokenService.getToken();
+    var jwtInterceptor, logout, refreshingToken;
+    refreshingToken = null;
+    jwtInterceptor = function(TokenService, $http, API_URL) {
+      var currentToken, handleRefreshResponse, refreshingTokenComplete;
+      currentToken = TokenService.getToken();
+      handleRefreshResponse = function(res) {
+        var newToken, ref, ref1, ref2;
+        newToken = (ref = res.data) != null ? (ref1 = ref.result) != null ? (ref2 = ref1.content) != null ? ref2.token : void 0 : void 0 : void 0;
+        TokenService.setToken(newToken);
+        return newToken;
+      };
+      refreshingTokenComplete = function() {
+        return refreshingToken = null;
+      };
+      if (TokenService.tokenIsValid() && TokenService.tokenIsExpired()) {
+        if (refreshingToken === null) {
+          config = {
+            method: 'GET',
+            url: API_URL + "/v3/authorizations/1",
+            headers: {
+              'Authorization': "Bearer " + currentToken
+            }
+          };
+          refreshingToken = $http(config).then(handleRefreshResponse)["finally"](refreshingTokenComplete);
+        }
+        return refreshingToken;
+      } else {
+        return currentToken;
+      }
     };
-    jwtInterceptor.$inject = ['TokenService'];
+    jwtInterceptor.$inject = ['TokenService', '$http', 'API_URL'];
     jwtInterceptorProvider.tokenGetter = jwtInterceptor;
     $httpProvider.interceptors.push('jwtInterceptor');
     authProvider.init({
@@ -24,36 +50,13 @@
     return authProvider.on('logout', logout);
   };
 
-  run = function($rootScope, $injector, $state, auth, TokenService, AuthService) {
-    var checkAuth, checkRedirect;
-    auth.hookEvents();
-    checkRedirect = function() {
-      var isProtected, notLoggedIn;
-      isProtected = !toState.data || (toState.data && !toState.data.noAuthRequired);
-      notLoggedIn = !AuthService.isAuthenticated();
-      if (isProtected && notLoggedIn) {
-        $rootScope.preAuthState = toState.name;
-        event.preventDefault();
-        return $state.go('login');
-      }
-    };
-    return checkAuth = function(event, toState) {
-      var isInvalidToken;
-      isInvalidToken = TokenService.getToken() && !TokenService.tokenIsValid();
-      if (isInvalidToken) {
-        AuthService.refreshToken().then(function() {
-          return checkRedirect();
-        });
-      } else {
-        checkRedirect();
-      }
-      return $rootScope.$on('$stateChangeStart', checkAuth);
-    };
+  run = function(auth) {
+    return auth.hookEvents();
   };
 
   config.$inject = ['$httpProvider', 'jwtInterceptorProvider', 'authProvider', 'AUTH0_DOMAIN', 'AUTH0_CLIENT_ID'];
 
-  run.$inject = ['$rootScope', '$injector', '$state', 'auth', 'TokenService', 'AuthService'];
+  run.$inject = ['auth'];
 
   angular.module('appirio-tech-ng-auth', dependencies).config(config).run(run);
 
@@ -63,7 +66,7 @@
   'use strict';
   var AuthService;
 
-  AuthService = function($rootScope, AuthorizationsAPIService, auth, store, TokenService) {
+  AuthService = function(AuthorizationsAPIService, auth, store, TokenService) {
     var exchangeToken, isAuthenticated, isLoggedIn, loggedIn, login, logout, refreshToken;
     loggedIn = null;
     isLoggedIn = function() {
@@ -178,7 +181,7 @@
     };
   };
 
-  AuthService.$inject = ['$rootScope', 'AuthorizationsAPIService', 'auth', 'store', 'TokenService'];
+  AuthService.$inject = ['AuthorizationsAPIService', 'auth', 'store', 'TokenService'];
 
   angular.module('appirio-tech-ng-auth').factory('AuthService', AuthService);
 
@@ -188,7 +191,7 @@
   'use strict';
   var TokenService;
 
-  TokenService = function($rootScope, $http, store, AUTH0_TOKEN_NAME, AUTH0_REFRESH_TOKEN_NAME, jwtHelper) {
+  TokenService = function(store, AUTH0_TOKEN_NAME, AUTH0_REFRESH_TOKEN_NAME, jwtHelper) {
     var decodeToken, deleteRefreshToken, deleteToken, getRefreshToken, getToken, setToken, storeRefreshToken, tokenIsExpired, tokenIsValid;
     getToken = function() {
       return store.get(AUTH0_TOKEN_NAME);
@@ -246,7 +249,7 @@
     };
   };
 
-  TokenService.$inject = ['$rootScope', '$http', 'store', 'AUTH0_TOKEN_NAME', 'AUTH0_REFRESH_TOKEN_NAME', 'jwtHelper'];
+  TokenService.$inject = ['store', 'AUTH0_TOKEN_NAME', 'AUTH0_REFRESH_TOKEN_NAME', 'jwtHelper'];
 
   angular.module('appirio-tech-ng-auth').factory('TokenService', TokenService);
 
