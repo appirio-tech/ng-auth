@@ -1,6 +1,6 @@
 'use strict'
 
-NgAuthController = (AuthService, TokenService) ->
+NgAuthController = (AuthService, TokenService, SubmitWorkAPIService) ->
   vm              = this
   vm.message      = ''
   vm.token        = ''
@@ -44,6 +44,12 @@ NgAuthController = (AuthService, TokenService) ->
   vm.isAuthenticated = ->
     vm.message = AuthService.isAuthenticated()
 
+  vm.workApi = ->
+    resource = SubmitWorkAPIService.get id: 123
+
+    resource.$promise.then (response) ->
+      vm.message = response
+
   activate = ->
     getTokens()
 
@@ -51,6 +57,6 @@ NgAuthController = (AuthService, TokenService) ->
 
   activate()
 
-NgAuthController.$inject = ['AuthService', 'TokenService']
+NgAuthController.$inject = ['AuthService', 'TokenService', 'SubmitWorkAPIService']
 
 angular.module('example').controller 'NgAuthController', NgAuthController
