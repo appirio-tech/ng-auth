@@ -17,22 +17,26 @@ config = (
   AUTH0_DOMAIN
   AUTH0_CLIENT_ID
 ) ->
+  # Initialize Auth0
+  authProvider.init
+    domain    : AUTH0_DOMAIN
+    clientID  : AUTH0_CLIENT_ID
+    loginState: 'login'
+
+  # Setup our JWT Interceptor
   refreshingToken = null
 
   jwtInterceptor = (TokenService, AuthService) ->
     refreshingTokenComplete = ->
       refreshingToken = null
 
-    if TokenService.tokenIsValid()
-      if TokenService.tokenIsExpired()
-        if refreshingToken == null
-          refreshingToken = AuthService.exchangeToken().finally(refreshingTokenComplete)
+    if TokenService.tokenIsValid() && TokenService.tokenIsExpired()
+      if refreshingToken == null
+        refreshingToken = AuthService.getNewToken().finally(refreshingTokenComplete)
 
-        refreshingToken
-      else
-        TokenService.getToken()
+      refreshingToken
     else
-      ''
+      TokenService.getToken()
 
   jwtInterceptor.$inject = ['TokenService', 'AuthService']
 
@@ -40,20 +44,12 @@ config = (
 
   $httpProvider.interceptors.push 'jwtInterceptor'
 
-  authProvider.init
-    domain    : AUTH0_DOMAIN
-    clientID  : AUTH0_CLIENT_ID
-    loginState: 'login'
-
-  logout = (TokenService) ->
-    TokenService.deleteToken()
-
-  logout.$inject = ['TokenService']
-
-  authProvider.on 'logout', logout
-
-run = (auth) ->
+run = (auth, $rootScope, AuthService) ->
   auth.hookEvents()
+
+  # On browser refresh, set logged in state based on valid JWT
+  $rootScope.$on '$locationChangeStart', ->
+    AuthService.setLoggedInFromStore()
 
 config.$inject = [
   '$httpProvider'
@@ -65,6 +61,8 @@ config.$inject = [
 
 run.$inject = [
   'auth'
+  '$rootScope'
+  'AuthService'
 ]
 
 angular.module('appirio-tech-ng-auth', dependencies).config(config).run run

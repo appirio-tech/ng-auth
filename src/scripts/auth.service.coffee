@@ -12,17 +12,20 @@ AuthService = (
   isLoggedIn = ->
     loggedIn
 
+  setLoggedInFromStore = ->
+    loggedIn = TokenService.tokenIsValid()
+    auth.isAuthenticated = TokenService.tokenIsValid()
+
   logout = ->
     loggedIn = false
-
     auth.signout()
     TokenService.deleteAllTokens()
 
-    AuthorizationsAPIService.remove().$promise
+    $q.when(true)
 
   # Currently Auth0
   externalLogin = (options) ->
-    deferred       = $q.defer()
+    deferred = $q.defer()
 
     defaultOptions =
       retUrl: '/'
@@ -41,20 +44,17 @@ AuthService = (
       deferred.reject(err)
 
     signinSuccess = (profile, idToken, accessToken, state, refreshToken) ->
-      TokenService.setExternalToken idToken
-      TokenService.setRefreshToken refreshToken
-      deferred.resolve()
+      deferred.resolve(idToken, refreshToken)
 
     auth.signin params, signinSuccess, signinError
 
     deferred.promise
 
-  exchangeToken = ->
-    console.log 'exchanging:'
-    console.log TokenService.getRefreshToken()
-    console.log 'AND'
-    console.log TokenService.getExternalToken()
+  setExternalTokens = (externalToken, refreshToken) ->
+    TokenService.setExternalToken externalToken
+    TokenService.setRefreshToken refreshToken
 
+  getNewToken = ->
     params =
       param:
         refreshToken: TokenService.getRefreshToken()
@@ -64,22 +64,27 @@ AuthService = (
 
     newAuth.$save().then (res) ->
       newToken = res.result?.content?.token
-      loggedIn = true
 
       TokenService.setToken newToken
 
       newToken
 
   login = (options) ->
-    externalLogin(options).then ->
-      TokenService.deleteToken()
-      # store.set 'login-state', options.state if options?.state
-      exchangeToken()
+    success = options.success || angular.noop
+    error = options.error || angular.noop
 
-  login          : login
-  logout         : logout
-  isLoggedIn     : isLoggedIn
-  exchangeToken  : exchangeToken
+    externalLogin(options)
+      .then(setExternalTokens)
+      .then(getNewToken)
+      .then(setLoggedInFromStore)
+      .then(success)
+      .catch(error)
+
+  setLoggedInFromStore : setLoggedInFromStore
+  login                : login
+  logout               : logout
+  isLoggedIn           : isLoggedIn
+  getNewToken          : getNewToken
 
 AuthService.$inject = [
  'AuthorizationsAPIService'
