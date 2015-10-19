@@ -19,9 +19,6 @@ describe 'Authorization Service', ->
   it 'should have a logout method', ->
     expect(srv.logout).to.be.ok
 
-  it 'should have a refreshAppirioJWT method', ->
-    expect(srv.refreshAppirioJWT).to.be.ok
-
   describe 'login method', ->
     beforeEach inject (TokenService) ->
 
@@ -39,9 +36,3 @@ describe 'Authorization Service', ->
     it 'should have called TokenService.deleteToken', ->
       wasCalled = deleteAllTokensSpy.called
       expect(wasCalled).to.be.ok
-
-  describe 'refreshAppirioJWT method', ->
-    beforeEach inject ($httpBackend) ->
-      $httpBackend.flush()
-
-
