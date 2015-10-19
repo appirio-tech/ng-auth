@@ -1,9 +1,7 @@
 'use strict'
 
 dependencies = [
-  'ngResource'
   'app.constants'
-  'ui.router'
   'angular-storage'
   'angular-jwt'
   'auth0'
@@ -17,15 +15,22 @@ config = (
   AUTH0_DOMAIN
   AUTH0_CLIENT_ID
 ) ->
+  # Initialize Auth0
+  authProvider.init
+    domain    : AUTH0_DOMAIN
+    clientID  : AUTH0_CLIENT_ID
+    loginState: 'login'
+
+  # Setup our JWT Interceptor
   refreshingToken = null
 
   jwtInterceptor = (TokenService, $http, API_URL) ->
-    currentToken = TokenService.getToken()
+    currentToken = TokenService.getAppirioJWT()
 
     handleRefreshResponse = (res) ->
       newToken = res.data?.result?.content?.token
 
-      TokenService.setToken newToken
+      TokenService.setAppirioJWT newToken
 
       newToken
 
@@ -40,6 +45,8 @@ config = (
           headers:
             'Authorization': "Bearer #{currentToken}"
 
+        # IMPORTANT: This API call must be defined here in the config block
+        # If you're thinking of refactoring, here be dragons!
         refreshingToken = $http(config).then(handleRefreshResponse).finally(refreshingTokenComplete)
 
       refreshingToken
@@ -52,19 +59,7 @@ config = (
 
   $httpProvider.interceptors.push 'jwtInterceptor'
 
-  authProvider.init
-    domain    : AUTH0_DOMAIN
-    clientID  : AUTH0_CLIENT_ID
-    loginState: 'login'
-
-  logout = (TokenService) ->
-    TokenService.deleteToken()
-
-  logout.$inject = ['TokenService']
-
-  authProvider.on 'logout', logout
-
-run = (auth) ->
+run = (auth, $rootScope, AuthService) ->
   auth.hookEvents()
 
 config.$inject = [
@@ -77,6 +72,8 @@ config.$inject = [
 
 run.$inject = [
   'auth'
+  '$rootScope'
+  'AuthService'
 ]
 
 angular.module('appirio-tech-ng-auth', dependencies).config(config).run run

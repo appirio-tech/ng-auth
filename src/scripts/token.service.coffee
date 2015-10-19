@@ -6,26 +6,40 @@ TokenService = (
   AUTH0_REFRESH_TOKEN_NAME
   jwtHelper
 ) ->
-  getToken = ->
-    store.get AUTH0_TOKEN_NAME
-
-  setToken = (token) ->
+  setAppirioJWT = (token) ->
     store.set AUTH0_TOKEN_NAME, token
 
-  storeRefreshToken = (token) ->
-    store.set AUTH0_REFRESH_TOKEN_NAME, token
+  getAppirioJWT = ->
+    store.get AUTH0_TOKEN_NAME
 
-  getRefreshToken = (token) ->
-    store.get AUTH0_REFRESH_TOKEN_NAME, token
-
-  deleteToken = ->
+  deleteAppirioJWT = ->
     store.remove AUTH0_TOKEN_NAME
 
-  deleteRefreshToken = ->
+  setAuth0RefreshToken = (token) ->
+    store.set AUTH0_REFRESH_TOKEN_NAME, token
+
+  getAuth0RefreshToken = (token) ->
+    store.get AUTH0_REFRESH_TOKEN_NAME, token
+
+  deleteAuth0RefreshToken = ->
     store.remove AUTH0_REFRESH_TOKEN_NAME
 
+  setAuth0Token = (token) ->
+    store.set 'auth0Jwt', token
+
+  getAuth0Token = (token) ->
+    store.get 'auth0Jwt', token
+
+  deleteAuth0Token = ->
+    store.remove 'auth0Jwt'
+
+  deleteAllTokens = ->
+    deleteAppirioJWT()
+    deleteAuth0RefreshToken()
+    deleteAuth0Token()
+
   decodeToken = ->
-    token = getToken()
+    token = getAppirioJWT()
 
     if token
       jwtHelper.decodeToken(token)
@@ -33,7 +47,7 @@ TokenService = (
       {}
 
   tokenIsExpired = ->
-    token    = getToken()
+    token    = getAppirioJWT()
     isString = (typeof token == 'string')
 
     if isString
@@ -42,20 +56,24 @@ TokenService = (
       true
 
   tokenIsValid = ->
-    token    = getToken()
+    token    = getAppirioJWT()
     isString = (typeof token == 'string')
 
     isString
 
-  getToken          : getToken
-  deleteToken       : deleteToken
-  decodeToken       : decodeToken
-  setToken          : setToken
-  tokenIsValid      : tokenIsValid
-  tokenIsExpired    : tokenIsExpired
-  storeRefreshToken : storeRefreshToken
-  getRefreshToken   : getRefreshToken
-  deleteRefreshToken: deleteRefreshToken
+  setAppirioJWT            : setAppirioJWT
+  getAppirioJWT            : getAppirioJWT
+  deleteAppirioJWT         : deleteAppirioJWT
+  decodeToken              : decodeToken
+  setAuth0RefreshToken     : setAuth0RefreshToken
+  getAuth0RefreshToken     : getAuth0RefreshToken
+  deleteAuth0RefreshToken  : deleteAuth0RefreshToken
+  setAuth0Token            : setAuth0Token
+  getAuth0Token            : getAuth0Token
+  deleteAuth0Token         : deleteAuth0Token
+  deleteAllTokens          : deleteAllTokens
+  tokenIsValid             : tokenIsValid
+  tokenIsExpired           : tokenIsExpired
 
 TokenService.$inject = [
   'store'

@@ -55,8 +55,6 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
     currentUser = null
     loadUser() if AuthService.isLoggedIn()
 
-  loadUser() if AuthService.isAuthenticated()
-
   getCurrentUser: getCurrentUser
   createUser    : createUser
 

@@ -3,29 +3,23 @@
 AuthService = (
   AuthorizationsAPIService
   auth
-  store
   TokenService
+  $q
 ) ->
-  loggedIn = null
-
   isLoggedIn = ->
-    loggedIn
+    TokenService.tokenIsValid()
 
   logout = ->
-    auth.signout()
-    TokenService.deleteToken()
-    TokenService.deleteRefreshToken()
+    TokenService.deleteAllTokens()
 
-    loggedIn = false
-    request  = AuthorizationsAPIService.remove().$promise
+    # Return a promise here for API consistency
+    $q.when(true)
 
-    request.then (response, status, headers, config) ->
-      # do something
+  # TODO: Replace this method with a straight $http/$resource call
+  # TODO: Remove the auth0 library
+  auth0Signin = (options) ->
+    deferred = $q.defer()
 
-    request.catch (message) ->
-      # do something
-
-  login = (options) ->
     defaultOptions =
       retUrl: '/'
 
@@ -39,87 +33,56 @@ AuthService = (
       authParams:
         scope: 'openid profile offline_access'
 
-    onError = (err) ->
-      options?.error? err
+    signinError = (err) ->
+      deferred.reject(err)
 
-    onSuccess = (profile, idToken, accessToken, state, refreshToken) ->
-      exchangeToken idToken, refreshToken, options?.success
+    signinSuccess = (profile, idToken, accessToken, state, refreshToken) ->
+      deferred.resolve
+        identity: idToken
+        refresh: refreshToken
 
-    # First remove any old tokens
-    TokenService.deleteToken()
+    auth.signin params, signinSuccess, signinError
 
-    store.set 'login-state', options.state if options?.state
+    deferred.promise
 
-    auth.signin params, onSuccess, onError
+  setAuth0Tokens = (tokens) ->
+    TokenService.setAuth0Token tokens.identity
+    TokenService.setAuth0RefreshToken tokens.refresh
 
-  exchangeToken = (idToken, refreshToken, success, error) ->
-    TokenService.storeRefreshToken refreshToken
-
-    onSuccess = (res) ->
-      TokenService.setToken res?.result?.content?.token
-      loggedIn = true
-
-      success?(res)
-
-    onError = (res) ->
-      error?(res)
-
+  getNewJWT = ->
     params =
       param:
-        refreshToken: refreshToken
-        externalToken: idToken
+        refreshToken: TokenService.getAuth0RefreshToken()
+        externalToken: TokenService.getAuth0Token()
 
     newAuth = new AuthorizationsAPIService params
 
-    newAuth.$save onSuccess, onError
+    newAuth.$save().then (res) ->
+      res.result?.content?.token
 
-  refreshToken = (onSuccess = null) ->
-    token = TokenService.getRefreshToken()
+  setJWT = (JWT) ->
+    TokenService.setAppirioJWT JWT
 
-    if token
-      promise = auth.refreshIdToken token
+  login = (options) ->
+    success = options.success || angular.noop
+    error = options.error || angular.noop
 
-      promise.then (response) ->
-        resource = AuthorizationsAPIService.get(id: 1).$promise
+    auth0Signin(options)
+      .then(setAuth0Tokens)
+      .then(getNewJWT)
+      .then(setJWT)
+      .then(success)
+      .catch(error)
 
-        resource.then (response) ->
-          TokenService.setToken response?.result?.content?.token
-
-          loggedIn = true
-
-          onSuccess?()
-
-        resource.catch (response) ->
-          logout()
-
-        promise.catch (response) ->
-          logout()
-
-  isAuthenticated = ->
-    if TokenService.tokenIsValid()
-      if TokenService.tokenIsExpired()
-        refreshToken()
-
-        false
-      else
-        true
-    else
-      false
-
-  loggedIn = isAuthenticated()
-
-  login          : login
-  logout         : logout
-  isLoggedIn     : isLoggedIn
-  isAuthenticated: isAuthenticated
-  exchangeToken  : exchangeToken
-  refreshToken   : refreshToken
+  login      : login
+  logout     : logout
+  isLoggedIn : isLoggedIn
 
 AuthService.$inject = [
  'AuthorizationsAPIService'
  'auth'
- 'store'
  'TokenService'
+  '$q'
 ]
 
 angular.module('appirio-tech-ng-auth').factory 'AuthService', AuthService
