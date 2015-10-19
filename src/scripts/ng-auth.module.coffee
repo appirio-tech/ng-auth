@@ -1,9 +1,7 @@
 'use strict'
 
 dependencies = [
-  'ngResource'
   'app.constants'
-  'ui.router'
   'angular-storage'
   'angular-jwt'
   'auth0'
@@ -32,7 +30,7 @@ config = (
 
     if TokenService.tokenIsValid() && TokenService.tokenIsExpired()
       if refreshingToken == null
-        refreshingToken = AuthService.getNewToken().finally(refreshingTokenComplete)
+        refreshingToken = AuthService.getNewJWT().finally(refreshingTokenComplete)
 
       refreshingToken
     else
@@ -44,12 +42,20 @@ config = (
 
   $httpProvider.interceptors.push 'jwtInterceptor'
 
+  logout = (TokenService) ->
+    TokenService.deleteAllTokens()
+
+  logout.$inject = ['TokenService']
+
+  authProvider.on 'logout', logout
+
 run = (auth, $rootScope, AuthService) ->
+  # Kicks of Auth0's event hooks for route protection.
   auth.hookEvents()
 
   # On browser refresh, set logged in state based on valid JWT
   $rootScope.$on '$locationChangeStart', ->
-    AuthService.setLoggedInFromStore()
+    AuthService.updateStatus()
 
 config.$inject = [
   '$httpProvider'

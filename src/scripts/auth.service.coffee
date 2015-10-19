@@ -3,28 +3,21 @@
 AuthService = (
   AuthorizationsAPIService
   auth
-  store
   TokenService
   $q
 ) ->
-  loggedIn = TokenService.tokenIsValid()
-
   isLoggedIn = ->
-    loggedIn
+    auth.isAuthenticated
 
-  setLoggedInFromStore = ->
-    loggedIn = TokenService.tokenIsValid()
+  updateStatus = ->
     auth.isAuthenticated = TokenService.tokenIsValid()
 
   logout = ->
-    loggedIn = false
     auth.signout()
-    TokenService.deleteAllTokens()
 
     $q.when(true)
 
-  # Currently Auth0
-  externalLogin = (options) ->
+  auth0Signin = (options) ->
     deferred = $q.defer()
 
     defaultOptions =
@@ -44,17 +37,26 @@ AuthService = (
       deferred.reject(err)
 
     signinSuccess = (profile, idToken, accessToken, state, refreshToken) ->
-      deferred.resolve(idToken, refreshToken)
+      # TODO: Remove this dirty hack
+      # Without this UserService kicks of its loadUser method too early
+      auth.isAuthenticated = false
+
+      deferred.resolve
+        external: idToken
+        refresh: refreshToken
 
     auth.signin params, signinSuccess, signinError
 
     deferred.promise
 
-  setExternalTokens = (externalToken, refreshToken) ->
-    TokenService.setExternalToken externalToken
-    TokenService.setRefreshToken refreshToken
+  setAuth0Tokens = (tokens) ->
+    TokenService.setExternalToken tokens.external
+    TokenService.setRefreshToken tokens.refresh
 
-  getNewToken = ->
+  setJWT = (jwt) ->
+    TokenService.setToken jwt
+
+  getNewJWT = ->
     params =
       param:
         refreshToken: TokenService.getRefreshToken()
@@ -63,33 +65,29 @@ AuthService = (
     newAuth = new AuthorizationsAPIService params
 
     newAuth.$save().then (res) ->
-      newToken = res.result?.content?.token
-
-      TokenService.setToken newToken
-
-      newToken
+      res.result?.content?.token
 
   login = (options) ->
     success = options.success || angular.noop
     error = options.error || angular.noop
 
-    externalLogin(options)
-      .then(setExternalTokens)
-      .then(getNewToken)
-      .then(setLoggedInFromStore)
+    auth0Signin(options)
+      .then(setAuth0Tokens)
+      .then(getNewJWT)
+      .then(setJWT)
+      .then(updateStatus)
       .then(success)
       .catch(error)
 
-  setLoggedInFromStore : setLoggedInFromStore
-  login                : login
-  logout               : logout
-  isLoggedIn           : isLoggedIn
-  getNewToken          : getNewToken
+  updateStatus : updateStatus
+  login        : login
+  logout       : logout
+  isLoggedIn   : isLoggedIn
+  getNewJWT    : getNewJWT
 
 AuthService.$inject = [
  'AuthorizationsAPIService'
  'auth'
- 'store'
  'TokenService'
   '$q'
 ]
