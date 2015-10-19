@@ -24,19 +24,36 @@ config = (
   # Setup our JWT Interceptor
   refreshingToken = null
 
-  jwtInterceptor = (TokenService, AuthService) ->
+  jwtInterceptor = (TokenService, $http, API_URL) ->
+    currentToken = TokenService.getAppirioJWT()
+
+    handleRefreshResponse = (res) ->
+      newToken = res.data?.result?.content?.token
+
+      TokenService.setAppirioJWT newToken
+
+      newToken
+
     refreshingTokenComplete = ->
       refreshingToken = null
 
     if TokenService.tokenIsValid() && TokenService.tokenIsExpired()
       if refreshingToken == null
-        refreshingToken = AuthService.refreshAppirioJWT().finally(refreshingTokenComplete)
+        config =
+          method: 'GET'
+          url: "#{API_URL}/v3/authorizations/1"
+          headers:
+            'Authorization': "Bearer #{currentToken}"
+
+        # IMPORTANT: This API call must be defined here in the config block
+        # If you're thinking of refactoring, here be dragons!
+        refreshingToken = $http(config).then(handleRefreshResponse).finally(refreshingTokenComplete)
 
       refreshingToken
     else
-      TokenService.getAppirioJWT()
+      currentToken
 
-  jwtInterceptor.$inject = ['TokenService', 'AuthService']
+  jwtInterceptor.$inject = ['TokenService', '$http', 'API_URL']
 
   jwtInterceptorProvider.tokenGetter = jwtInterceptor
 

@@ -12,8 +12,11 @@ AuthService = (
   logout = ->
     TokenService.deleteAllTokens()
 
+    # Return a promise here for API consistency
     $q.when(true)
 
+  # TODO: Replace this method with a straight $http/$resource call
+  # TODO: Remove the auth0 library
   auth0Signin = (options) ->
     deferred = $q.defer()
 
@@ -46,7 +49,7 @@ AuthService = (
     TokenService.setAuth0Token tokens.identity
     TokenService.setAuth0RefreshToken tokens.refresh
 
-  refreshAppirioJWT = ->
+  getNewJWT = ->
     params =
       param:
         refreshToken: TokenService.getAuth0RefreshToken()
@@ -55,11 +58,10 @@ AuthService = (
     newAuth = new AuthorizationsAPIService params
 
     newAuth.$save().then (res) ->
-      JWT = res.result?.content?.token
+      res.result?.content?.token
 
-      TokenService.setAppirioJWT JWT
-
-      JWT
+  setJWT = (JWT) ->
+    TokenService.setAppirioJWT JWT
 
   login = (options) ->
     success = options.success || angular.noop
@@ -67,14 +69,14 @@ AuthService = (
 
     auth0Signin(options)
       .then(setAuth0Tokens)
-      .then(refreshAppirioJWT)
+      .then(getNewJWT)
+      .then(setJWT)
       .then(success)
       .catch(error)
 
-  login             : login
-  logout            : logout
-  isLoggedIn        : isLoggedIn
-  refreshAppirioJWT : refreshAppirioJWT
+  login      : login
+  logout     : logout
+  isLoggedIn : isLoggedIn
 
 AuthService.$inject = [
  'AuthorizationsAPIService'
