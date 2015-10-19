@@ -7,13 +7,10 @@ AuthService = (
   $q
 ) ->
   isLoggedIn = ->
-    auth.isAuthenticated
-
-  updateStatus = ->
-    auth.isAuthenticated = TokenService.tokenIsValid()
+    TokenService.tokenIsValid()
 
   logout = ->
-    auth.signout()
+    TokenService.deleteAllTokens()
 
     $q.when(true)
 
@@ -37,12 +34,8 @@ AuthService = (
       deferred.reject(err)
 
     signinSuccess = (profile, idToken, accessToken, state, refreshToken) ->
-      # TODO: Remove this dirty hack
-      # Without this UserService kicks of its loadUser method too early
-      auth.isAuthenticated = false
-
       deferred.resolve
-        external: idToken
+        identity: idToken
         refresh: refreshToken
 
     auth.signin params, signinSuccess, signinError
@@ -50,22 +43,23 @@ AuthService = (
     deferred.promise
 
   setAuth0Tokens = (tokens) ->
-    TokenService.setExternalToken tokens.external
-    TokenService.setRefreshToken tokens.refresh
+    TokenService.setAuth0Token tokens.identity
+    TokenService.setAuth0RefreshToken tokens.refresh
 
-  setJWT = (jwt) ->
-    TokenService.setToken jwt
-
-  getNewJWT = ->
+  refreshAppirioJWT = ->
     params =
       param:
-        refreshToken: TokenService.getRefreshToken()
-        externalToken: TokenService.getExternalToken()
+        refreshToken: TokenService.getAuth0RefreshToken()
+        externalToken: TokenService.getAuth0Token()
 
     newAuth = new AuthorizationsAPIService params
 
     newAuth.$save().then (res) ->
-      res.result?.content?.token
+      JWT = res.result?.content?.token
+
+      TokenService.setAppirioJWT JWT
+
+      JWT
 
   login = (options) ->
     success = options.success || angular.noop
@@ -73,17 +67,14 @@ AuthService = (
 
     auth0Signin(options)
       .then(setAuth0Tokens)
-      .then(getNewJWT)
-      .then(setJWT)
-      .then(updateStatus)
+      .then(refreshAppirioJWT)
       .then(success)
       .catch(error)
 
-  updateStatus : updateStatus
-  login        : login
-  logout       : logout
-  isLoggedIn   : isLoggedIn
-  getNewJWT    : getNewJWT
+  login             : login
+  logout            : logout
+  isLoggedIn        : isLoggedIn
+  refreshAppirioJWT : refreshAppirioJWT
 
 AuthService.$inject = [
  'AuthorizationsAPIService'

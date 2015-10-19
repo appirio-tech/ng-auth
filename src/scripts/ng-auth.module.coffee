@@ -30,11 +30,11 @@ config = (
 
     if TokenService.tokenIsValid() && TokenService.tokenIsExpired()
       if refreshingToken == null
-        refreshingToken = AuthService.getNewJWT().finally(refreshingTokenComplete)
+        refreshingToken = AuthService.refreshAppirioJWT().finally(refreshingTokenComplete)
 
       refreshingToken
     else
-      TokenService.getToken()
+      TokenService.getAppirioJWT()
 
   jwtInterceptor.$inject = ['TokenService', 'AuthService']
 
@@ -42,20 +42,8 @@ config = (
 
   $httpProvider.interceptors.push 'jwtInterceptor'
 
-  logout = (TokenService) ->
-    TokenService.deleteAllTokens()
-
-  logout.$inject = ['TokenService']
-
-  authProvider.on 'logout', logout
-
 run = (auth, $rootScope, AuthService) ->
-  # Kicks of Auth0's event hooks for route protection.
   auth.hookEvents()
-
-  # On browser refresh, set logged in state based on valid JWT
-  $rootScope.$on '$locationChangeStart', ->
-    AuthService.updateStatus()
 
 config.$inject = [
   '$httpProvider'
