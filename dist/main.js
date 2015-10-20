@@ -2,18 +2,23 @@
   'use strict';
   var config, dependencies, run;
 
-  dependencies = ['ngResource', 'app.constants', 'ui.router', 'angular-storage', 'angular-jwt', 'auth0', 'appirio-tech-ng-api-services'];
+  dependencies = ['app.constants', 'angular-storage', 'angular-jwt', 'auth0', 'appirio-tech-ng-api-services'];
 
   config = function($httpProvider, jwtInterceptorProvider, authProvider, AUTH0_DOMAIN, AUTH0_CLIENT_ID) {
-    var jwtInterceptor, logout, refreshingToken;
+    var jwtInterceptor, refreshingToken;
+    authProvider.init({
+      domain: AUTH0_DOMAIN,
+      clientID: AUTH0_CLIENT_ID,
+      loginState: 'login'
+    });
     refreshingToken = null;
     jwtInterceptor = function(TokenService, $http, API_URL) {
       var currentToken, handleRefreshResponse, refreshingTokenComplete;
-      currentToken = TokenService.getToken();
+      currentToken = TokenService.getAppirioJWT();
       handleRefreshResponse = function(res) {
         var newToken, ref, ref1, ref2;
         newToken = (ref = res.data) != null ? (ref1 = ref.result) != null ? (ref2 = ref1.content) != null ? ref2.token : void 0 : void 0 : void 0;
-        TokenService.setToken(newToken);
+        TokenService.setAppirioJWT(newToken);
         return newToken;
       };
       refreshingTokenComplete = function() {
@@ -37,26 +42,16 @@
     };
     jwtInterceptor.$inject = ['TokenService', '$http', 'API_URL'];
     jwtInterceptorProvider.tokenGetter = jwtInterceptor;
-    $httpProvider.interceptors.push('jwtInterceptor');
-    authProvider.init({
-      domain: AUTH0_DOMAIN,
-      clientID: AUTH0_CLIENT_ID,
-      loginState: 'login'
-    });
-    logout = function(TokenService) {
-      return TokenService.deleteToken();
-    };
-    logout.$inject = ['TokenService'];
-    return authProvider.on('logout', logout);
+    return $httpProvider.interceptors.push('jwtInterceptor');
   };
 
-  run = function(auth) {
+  run = function(auth, $rootScope, AuthService) {
     return auth.hookEvents();
   };
 
   config.$inject = ['$httpProvider', 'jwtInterceptorProvider', 'authProvider', 'AUTH0_DOMAIN', 'AUTH0_CLIENT_ID'];
 
-  run.$inject = ['auth'];
+  run.$inject = ['auth', '$rootScope', 'AuthService'];
 
   angular.module('appirio-tech-ng-auth', dependencies).config(config).run(run);
 
@@ -66,24 +61,18 @@
   'use strict';
   var AuthService;
 
-  AuthService = function(AuthorizationsAPIService, auth, store, TokenService) {
-    var exchangeToken, isAuthenticated, isLoggedIn, loggedIn, login, logout, refreshToken;
-    loggedIn = null;
+  AuthService = function(AuthorizationsAPIService, auth, TokenService, $q) {
+    var auth0Signin, getNewJWT, isLoggedIn, login, logout, setAuth0Tokens, setJWT;
     isLoggedIn = function() {
-      return loggedIn;
+      return TokenService.tokenIsValid();
     };
     logout = function() {
-      var request;
-      auth.signout();
-      TokenService.deleteToken();
-      TokenService.deleteRefreshToken();
-      loggedIn = false;
-      request = AuthorizationsAPIService.remove().$promise;
-      request.then(function(response, status, headers, config) {});
-      return request["catch"](function(message) {});
+      TokenService.deleteAllTokens();
+      return $q.when(true);
     };
-    login = function(options) {
-      var defaultOptions, lOptions, onError, onSuccess, params;
+    auth0Signin = function(options) {
+      var defaultOptions, deferred, lOptions, params, signinError, signinSuccess;
+      deferred = $q.defer();
       defaultOptions = {
         retUrl: '/'
       };
@@ -97,91 +86,53 @@
           scope: 'openid profile offline_access'
         }
       };
-      onError = function(err) {
-        return options != null ? typeof options.error === "function" ? options.error(err) : void 0 : void 0;
+      signinError = function(err) {
+        return deferred.reject(err);
       };
-      onSuccess = function(profile, idToken, accessToken, state, refreshToken) {
-        return exchangeToken(idToken, refreshToken, options != null ? options.success : void 0);
+      signinSuccess = function(profile, idToken, accessToken, state, refreshToken) {
+        return deferred.resolve({
+          identity: idToken,
+          refresh: refreshToken
+        });
       };
-      TokenService.deleteToken();
-      if (options != null ? options.state : void 0) {
-        store.set('login-state', options.state);
-      }
-      return auth.signin(params, onSuccess, onError);
+      auth.signin(params, signinSuccess, signinError);
+      return deferred.promise;
     };
-    exchangeToken = function(idToken, refreshToken, success, error) {
-      var newAuth, onError, onSuccess, params;
-      TokenService.storeRefreshToken(refreshToken);
-      onSuccess = function(res) {
-        var ref, ref1;
-        TokenService.setToken(res != null ? (ref = res.result) != null ? (ref1 = ref.content) != null ? ref1.token : void 0 : void 0 : void 0);
-        loggedIn = true;
-        return typeof success === "function" ? success(res) : void 0;
-      };
-      onError = function(res) {
-        return typeof error === "function" ? error(res) : void 0;
-      };
+    setAuth0Tokens = function(tokens) {
+      TokenService.setAuth0Token(tokens.identity);
+      return TokenService.setAuth0RefreshToken(tokens.refresh);
+    };
+    getNewJWT = function() {
+      var newAuth, params;
       params = {
         param: {
-          refreshToken: refreshToken,
-          externalToken: idToken
+          refreshToken: TokenService.getAuth0RefreshToken(),
+          externalToken: TokenService.getAuth0Token()
         }
       };
       newAuth = new AuthorizationsAPIService(params);
-      return newAuth.$save(onSuccess, onError);
+      return newAuth.$save().then(function(res) {
+        var ref, ref1;
+        return (ref = res.result) != null ? (ref1 = ref.content) != null ? ref1.token : void 0 : void 0;
+      });
     };
-    refreshToken = function(onSuccess) {
-      var promise, token;
-      if (onSuccess == null) {
-        onSuccess = null;
-      }
-      token = TokenService.getRefreshToken();
-      if (token) {
-        promise = auth.refreshIdToken(token);
-        return promise.then(function(response) {
-          var resource;
-          resource = AuthorizationsAPIService.get({
-            id: 1
-          }).$promise;
-          resource.then(function(response) {
-            var ref, ref1;
-            TokenService.setToken(response != null ? (ref = response.result) != null ? (ref1 = ref.content) != null ? ref1.token : void 0 : void 0 : void 0);
-            loggedIn = true;
-            return typeof onSuccess === "function" ? onSuccess() : void 0;
-          });
-          resource["catch"](function(response) {
-            return logout();
-          });
-          return promise["catch"](function(response) {
-            return logout();
-          });
-        });
-      }
+    setJWT = function(JWT) {
+      return TokenService.setAppirioJWT(JWT);
     };
-    isAuthenticated = function() {
-      if (TokenService.tokenIsValid()) {
-        if (TokenService.tokenIsExpired()) {
-          refreshToken();
-          return false;
-        } else {
-          return true;
-        }
-      } else {
-        return false;
-      }
+    login = function(options) {
+      var error, success;
+      success = options.success || angular.noop;
+      error = options.error || angular.noop;
+      return auth0Signin(options).then(setAuth0Tokens).then(getNewJWT).then(setJWT).then(success)["catch"](error);
     };
-    loggedIn = isAuthenticated();
     return {
       login: login,
       logout: logout,
-      isLoggedIn: isLoggedIn,
-      isAuthenticated: isAuthenticated,
-      exchangeToken: exchangeToken,
-      refreshToken: refreshToken
+      isLoggedIn: isLoggedIn
     };
   };
 
-  AuthService.$inject = ['AuthorizationsAPIService', 'auth', 'store', 'TokenService'];
+  AuthService.$inject = ['AuthorizationsAPIService', 'auth', 'TokenService', '$q'];
 
   angular.module('appirio-tech-ng-auth').factory('AuthService', AuthService);
 
@@ -192,28 +143,42 @@
   var TokenService;
 
   TokenService = function(store, AUTH0_TOKEN_NAME, AUTH0_REFRESH_TOKEN_NAME, jwtHelper) {
-    var decodeToken, deleteRefreshToken, deleteToken, getRefreshToken, getToken, setToken, storeRefreshToken, tokenIsExpired, tokenIsValid;
-    getToken = function() {
-      return store.get(AUTH0_TOKEN_NAME);
-    };
-    setToken = function(token) {
+    var decodeToken, deleteAllTokens, deleteAppirioJWT, deleteAuth0RefreshToken, deleteAuth0Token, getAppirioJWT, getAuth0RefreshToken, getAuth0Token, setAppirioJWT, setAuth0RefreshToken, setAuth0Token, tokenIsExpired, tokenIsValid;
+    setAppirioJWT = function(token) {
       return store.set(AUTH0_TOKEN_NAME, token);
     };
-    storeRefreshToken = function(token) {
-      return store.set(AUTH0_REFRESH_TOKEN_NAME, token);
+    getAppirioJWT = function() {
+      return store.get(AUTH0_TOKEN_NAME);
     };
-    getRefreshToken = function(token) {
-      return store.get(AUTH0_REFRESH_TOKEN_NAME, token);
-    };
-    deleteToken = function() {
+    deleteAppirioJWT = function() {
       return store.remove(AUTH0_TOKEN_NAME);
     };
-    deleteRefreshToken = function() {
+    setAuth0RefreshToken = function(token) {
+      return store.set(AUTH0_REFRESH_TOKEN_NAME, token);
+    };
+    getAuth0RefreshToken = function(token) {
+      return store.get(AUTH0_REFRESH_TOKEN_NAME, token);
+    };
+    deleteAuth0RefreshToken = function() {
       return store.remove(AUTH0_REFRESH_TOKEN_NAME);
+    };
+    setAuth0Token = function(token) {
+      return store.set('auth0Jwt', token);
+    };
+    getAuth0Token = function(token) {
+      return store.get('auth0Jwt', token);
+    };
+    deleteAuth0Token = function() {
+      return store.remove('auth0Jwt');
+    };
+    deleteAllTokens = function() {
+      deleteAppirioJWT();
+      deleteAuth0RefreshToken();
+      return deleteAuth0Token();
     };
     decodeToken = function() {
       var token;
-      token = getToken();
+      token = getAppirioJWT();
       if (token) {
         return jwtHelper.decodeToken(token);
       } else {
@@ -222,7 +187,7 @@
     };
     tokenIsExpired = function() {
       var isString, token;
-      token = getToken();
+      token = getAppirioJWT();
       isString = typeof token === 'string';
       if (isString) {
         return jwtHelper.isTokenExpired(token);
@@ -232,20 +197,24 @@
     };
     tokenIsValid = function() {
       var isString, token;
-      token = getToken();
+      token = getAppirioJWT();
       isString = typeof token === 'string';
       return isString;
     };
     return {
-      getToken: getToken,
-      deleteToken: deleteToken,
+      setAppirioJWT: setAppirioJWT,
+      getAppirioJWT: getAppirioJWT,
+      deleteAppirioJWT: deleteAppirioJWT,
       decodeToken: decodeToken,
-      setToken: setToken,
+      setAuth0RefreshToken: setAuth0RefreshToken,
+      getAuth0RefreshToken: getAuth0RefreshToken,
+      deleteAuth0RefreshToken: deleteAuth0RefreshToken,
+      setAuth0Token: setAuth0Token,
+      getAuth0Token: getAuth0Token,
+      deleteAuth0Token: deleteAuth0Token,
+      deleteAllTokens: deleteAllTokens,
       tokenIsValid: tokenIsValid,
-      tokenIsExpired: tokenIsExpired,
-      storeRefreshToken: storeRefreshToken,
-      getRefreshToken: getRefreshToken,
-      deleteRefreshToken: deleteRefreshToken
+      tokenIsExpired: tokenIsExpired
     };
   };
 
@@ -321,9 +290,6 @@
         return loadUser();
       }
     });
-    if (AuthService.isAuthenticated()) {
-      loadUser();
-    }
     return {
       getCurrentUser: getCurrentUser,
       createUser: createUser

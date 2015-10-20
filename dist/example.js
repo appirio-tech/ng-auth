@@ -19,13 +19,13 @@ angular.module("app.constants", [])
   'use strict';
   var dependencies;
 
-  dependencies = ['ui.router', 'ngResource', 'app.constants', 'appirio-tech-ng-auth'];
+  dependencies = ['ui.router', 'ngResource', 'app.constants', 'appirio-tech-ng-auth', 'appirio-tech-ng-api-services'];
 
   angular.module('example', dependencies);
 
 }).call(this);
 
-angular.module("example").run(["$templateCache", function($templateCache) {$templateCache.put("views/ng-auth.html","<button ng-click=\"vm.login()\" class=\"success\">login</button><hr/><button ng-click=\"vm.logout()\" class=\"danger\">logout</button><hr/><button ng-click=\"vm.refreshToken()\" class=\"warning\">refreshToken</button><hr/><button ng-click=\"vm.isLoggedIn()\" class=\"info\">isLoggedIn</button><hr/><button ng-click=\"vm.isAuthenticated()\" class=\"info\">isAuthenticated</button><hr/><label>callbacks:</label><p>{{ vm.message }}</p><hr/><label>token:</label><p>{{ vm.token }}</p><hr/><label>refresh token:</label><p>{{ vm.aRefreshToken }}</p>");}]);
+angular.module("example").run(["$templateCache", function($templateCache) {$templateCache.put("views/ng-auth.html","<button ng-click=\"vm.login()\" class=\"success\">login</button><hr/><button ng-click=\"vm.logout()\" class=\"danger\">logout</button><hr/><button ng-click=\"vm.refreshToken()\" class=\"warning\">refreshToken</button><hr/><button ng-click=\"vm.isLoggedIn()\" class=\"info\">isLoggedIn</button><hr/><button ng-click=\"vm.isAuthenticated()\" class=\"info\">isAuthenticated</button><hr/><button ng-click=\"vm.workApi()\" class=\"info\">work api</button><hr/><label>callbacks:</label><p>{{ vm.message }}</p><hr/><label>token:</label><p>{{ vm.token }}</p><hr/><label>refresh token:</label><p>{{ vm.aRefreshToken }}</p>");}]);
 (function() {
   'use strict';
   var config;
@@ -57,7 +57,7 @@ angular.module("example").run(["$templateCache", function($templateCache) {$temp
   'use strict';
   var NgAuthController;
 
-  NgAuthController = function(AuthService, TokenService) {
+  NgAuthController = function(AuthService, TokenService, SubmitWorkAPIService) {
     var activate, getTokens, vm;
     vm = this;
     vm.message = '';
@@ -99,6 +99,15 @@ angular.module("example").run(["$templateCache", function($templateCache) {$temp
     vm.isAuthenticated = function() {
       return vm.message = AuthService.isAuthenticated();
     };
+    vm.workApi = function() {
+      var resource;
+      resource = SubmitWorkAPIService.get({
+        id: 123
+      });
+      return resource.$promise.then(function(response) {
+        return vm.message = response;
+      });
+    };
     activate = function() {
       getTokens();
       return vm;
@@ -106,7 +115,7 @@ angular.module("example").run(["$templateCache", function($templateCache) {$temp
     return activate();
   };
 
-  NgAuthController.$inject = ['AuthService', 'TokenService'];
+  NgAuthController.$inject = ['AuthService', 'TokenService', 'SubmitWorkAPIService'];
 
   angular.module('example').controller('NgAuthController', NgAuthController);
 
