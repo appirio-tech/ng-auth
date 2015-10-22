@@ -51,7 +51,8 @@ TokenService = (
     isString = (typeof token == 'string')
 
     if isString
-      jwtHelper.isTokenExpired token
+      # Use an offset of 5m to force an early refresh
+      jwtHelper.isTokenExpired token, 300
     else
       true
 
