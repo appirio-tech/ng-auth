@@ -190,7 +190,7 @@
       token = getAppirioJWT();
       isString = typeof token === 'string';
       if (isString) {
-        return jwtHelper.isTokenExpired(token);
+        return jwtHelper.isTokenExpired(token, 300);
       } else {
         return true;
       }
