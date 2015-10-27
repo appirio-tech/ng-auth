@@ -228,14 +228,11 @@
   'use strict';
   var srv;
 
-  srv = function(UserV3APIService, profilesAPIService, TokenService, AuthService, $rootScope) {
+  srv = function(UserV3APIService, profilesAPIService, TokenService, AuthService, $rootScope, $q) {
     var createUser, currentUser, getCurrentUser, loadUser;
     currentUser = null;
-    loadUser = function(callback) {
+    loadUser = function() {
       var decodedToken, params, resource;
-      if (callback == null) {
-        callback = null;
-      }
       decodedToken = TokenService.decodeToken();
       if (decodedToken.userId) {
         params = {
@@ -248,6 +245,8 @@
           currentUser.role = currentUser.isCopilot ? 'copilot' : 'customer';
           return currentUser;
         });
+      } else {
+        return $q.reject();
       }
     };
     getCurrentUser = function() {
@@ -298,7 +297,7 @@
     };
   };
 
-  srv.$inject = ['UserV3APIService', 'profilesAPIService', 'TokenService', 'AuthService', '$rootScope'];
+  srv.$inject = ['UserV3APIService', 'profilesAPIService', 'TokenService', 'AuthService', '$rootScope', '$q'];
 
   angular.module('appirio-tech-ng-auth').factory('UserV3Service', srv);
 
