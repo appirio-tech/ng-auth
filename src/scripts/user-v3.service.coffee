@@ -1,9 +1,9 @@
 'use strict'
 
-srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootScope) ->
+srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootScope, $q) ->
   currentUser = null
 
-  loadUser = (callback = null) ->
+  loadUser = ->
     decodedToken = TokenService.decodeToken()
 
     if decodedToken.userId
@@ -18,6 +18,8 @@ srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootSco
         currentUser.role = if currentUser.isCopilot then 'copilot' else 'customer'
 
         currentUser
+    else
+      $q.reject()
 
   # This method should be very high performance since many things will be watching it.
   getCurrentUser = ->
@@ -59,6 +61,6 @@ srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootSco
   createUser    : createUser
   loadUser      : loadUser
 
-srv.$inject = ['UserV3APIService', 'profilesAPIService', 'TokenService', 'AuthService', '$rootScope']
+srv.$inject = ['UserV3APIService', 'profilesAPIService', 'TokenService', 'AuthService', '$rootScope', '$q']
 
 angular.module('appirio-tech-ng-auth').factory 'UserV3Service', srv
