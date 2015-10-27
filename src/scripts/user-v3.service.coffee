@@ -1,6 +1,6 @@
 'use strict'
 
-srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
+srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootScope) ->
   currentUser = null
 
   loadUser = (callback = null) ->
@@ -10,7 +10,7 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
       params =
         id: decodedToken.userId
 
-      resource = UserV3APIService.get params
+      resource = profilesAPIService.get params
 
       resource.$promise.then (response) ->
         currentUser = response
@@ -58,6 +58,6 @@ srv = (UserV3APIService, TokenService, AuthService, $rootScope) ->
   getCurrentUser: getCurrentUser
   createUser    : createUser
 
-srv.$inject = ['UserV3APIService', 'TokenService', 'AuthService', '$rootScope']
+srv.$inject = ['UserV3APIService', 'profilesAPIService', 'TokenService', 'AuthService', '$rootScope']
 
 angular.module('appirio-tech-ng-auth').factory 'UserV3Service', srv
