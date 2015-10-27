@@ -13,11 +13,11 @@ srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootSco
       resource = profilesAPIService.get params
 
       resource.$promise.then (response) ->
-        currentUser = response
+        currentUser      = response
+        currentUser.id   = currentUser.userId
+        currentUser.role = if currentUser.isCopilot then 'copilot' else 'customer'
 
-      resource.$promise.catch ->
-
-      resource.$promise.finally ->
+        currentUser
 
   # This method should be very high performance since many things will be watching it.
   getCurrentUser = ->
@@ -57,6 +57,7 @@ srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootSco
 
   getCurrentUser: getCurrentUser
   createUser    : createUser
+  loadUser      : loadUser
 
 srv.$inject = ['UserV3APIService', 'profilesAPIService', 'TokenService', 'AuthService', '$rootScope']
 
