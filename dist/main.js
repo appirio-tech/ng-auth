@@ -228,7 +228,7 @@
   'use strict';
   var srv;
 
-  srv = function(UserV3APIService, TokenService, AuthService, $rootScope) {
+  srv = function(UserV3APIService, profilesAPIService, TokenService, AuthService, $rootScope) {
     var createUser, currentUser, getCurrentUser, loadUser;
     currentUser = null;
     loadUser = function(callback) {
@@ -241,7 +241,7 @@
         params = {
           id: decodedToken.userId
         };
-        resource = UserV3APIService.get(params);
+        resource = profilesAPIService.get(params);
         resource.$promise.then(function(response) {
           return currentUser = response;
         });
@@ -296,7 +296,7 @@
     };
   };
 
-  srv.$inject = ['UserV3APIService', 'TokenService', 'AuthService', '$rootScope'];
+  srv.$inject = ['UserV3APIService', 'profilesAPIService', 'TokenService', 'AuthService', '$rootScope'];
 
   angular.module('appirio-tech-ng-auth').factory('UserV3Service', srv);
 
