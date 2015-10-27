@@ -242,11 +242,12 @@
           id: decodedToken.userId
         };
         resource = profilesAPIService.get(params);
-        resource.$promise.then(function(response) {
-          return currentUser = response;
+        return resource.$promise.then(function(response) {
+          currentUser = response;
+          currentUser.id = currentUser.userId;
+          currentUser.role = currentUser.isCopilot ? 'copilot' : 'customer';
+          return currentUser;
         });
-        resource.$promise["catch"](function() {});
-        return resource.$promise["finally"](function() {});
       }
     };
     getCurrentUser = function() {
@@ -292,7 +293,8 @@
     });
     return {
       getCurrentUser: getCurrentUser,
-      createUser: createUser
+      createUser: createUser,
+      loadUser: loadUser
     };
   };
 
