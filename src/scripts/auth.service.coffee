@@ -5,6 +5,8 @@ AuthService = (
   auth
   TokenService
   $q
+  API_URL
+  $http
 ) ->
   isLoggedIn = ->
     TokenService.tokenIsValid()
@@ -97,10 +99,12 @@ AuthService = (
   resetPassword  : resetPassword
 
 AuthService.$inject = [
- 'AuthorizationsAPIService'
- 'auth'
- 'TokenService'
+  'AuthorizationsAPIService'
+  'auth'
+  'TokenService'
   '$q'
+  'API_URL'
+  '$http'
 ]
 
 angular.module('appirio-tech-ng-auth').factory 'AuthService', AuthService
