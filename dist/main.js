@@ -62,7 +62,7 @@
   var AuthService;
 
   AuthService = function(AuthorizationsAPIService, auth, TokenService, $q) {
-    var auth0Signin, getNewJWT, isLoggedIn, login, logout, setAuth0Tokens, setJWT;
+    var auth0Signin, getNewJWT, isLoggedIn, login, logout, resetPassword, sendResetEmail, setAuth0Tokens, setJWT;
     isLoggedIn = function() {
       return TokenService.tokenIsValid();
     };
@@ -125,10 +125,33 @@
       error = options.error || angular.noop;
       return auth0Signin(options).then(setAuth0Tokens).then(getNewJWT).then(setJWT).then(success)["catch"](error);
     };
+    sendResetEmail = function(email) {
+      return $http({
+        method: 'GET',
+        url: API_URL + "/v3/users/resetToken?&email=" + email
+      });
+    };
+    resetPassword = function(handle, token, password) {
+      return $http({
+        method: 'PUT',
+        url: API_URL + "/v3/users/resetPassword",
+        data: {
+          param: {
+            handle: handle,
+            credential: {
+              password: password,
+              resetToken: token
+            }
+          }
+        }
+      });
+    };
     return {
       login: login,
       logout: logout,
-      isLoggedIn: isLoggedIn
+      isLoggedIn: isLoggedIn,
+      sendResetEmail: sendResetEmail,
+      resetPassword: resetPassword
     };
   };
 

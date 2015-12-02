@@ -39988,20 +39988,12 @@ module.exports={"version":"6.7.6"}
 
 (function() {
   'use strict';
-  var srv, transformIdOnlyResponse, transformResponse;
+  var srv, transformResponse;
 
   transformResponse = function(response) {
     var parsed, ref;
     parsed = JSON.parse(response);
     return (parsed != null ? (ref = parsed.result) != null ? ref.content : void 0 : void 0) || [];
-  };
-
-  transformIdOnlyResponse = function(response) {
-    var parsed, ref;
-    parsed = JSON.parse(response);
-    return {
-      id: parsed != null ? (ref = parsed.result) != null ? ref.content : void 0 : void 0
-    };
   };
 
   srv = function($resource, API_URL) {
@@ -40013,11 +40005,11 @@ module.exports={"version":"6.7.6"}
     methods = {
       put: {
         method: 'PUT',
-        transformResponse: transformIdOnlyResponse
+        transformResponse: transformResponse
       },
       post: {
         method: 'POST',
-        transformResponse: transformIdOnlyResponse
+        transformResponse: transformResponse
       },
       get: {
         transformResponse: transformResponse
@@ -40152,6 +40144,55 @@ module.exports={"version":"6.7.6"}
   transformResponse = function(response) {
     var parsed, ref;
     parsed = JSON.parse(response);
+    return (parsed != null ? (ref = parsed.result) != null ? ref.content : void 0 : void 0) || [];
+  };
+
+  srv = function($resource, API_URL) {
+    var methods, params, url;
+    url = API_URL + '/v3/projects/:projectId/status-reports/:reportId';
+    params = {
+      projectId: '@projectId',
+      reportId: '@reportId'
+    };
+    methods = {
+      get: {
+        method: 'GET',
+        transformResponse: transformResponse
+      },
+      query: {
+        method: 'GET',
+        isArray: true,
+        transformResponse: transformResponse
+      },
+      post: {
+        method: 'POST',
+        transformResponse: transformResponse
+      },
+      patch: {
+        method: 'PATCH',
+        transformResponse: transformResponse
+      },
+      put: {
+        method: 'PUT',
+        transformResponse: transformResponse
+      }
+    };
+    return $resource(url, {}, methods);
+  };
+
+  srv.$inject = ['$resource', 'API_URL'];
+
+  angular.module('appirio-tech-ng-api-services').factory('StatusReportAPIService', srv);
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var srv, transformResponse;
+
+  transformResponse = function(response) {
+    var parsed, ref;
+    parsed = JSON.parse(response);
     return (parsed != null ? (ref = parsed.result) != null ? ref.content : void 0 : void 0) || {};
   };
 
@@ -40168,11 +40209,59 @@ module.exports={"version":"6.7.6"}
         transformResponse: transformResponse
       }
     };
-    return $resource(url, params);
+    return $resource(url, params, actions);
   };
 
   srv.$inject = ['$resource', 'API_URL'];
 
   angular.module('appirio-tech-ng-api-services').factory('profilesAPIService', srv);
+
+}).call(this);
+
+(function() {
+  'use strict';
+  var srv, transformIdOnlyResponse, transformResponse;
+
+  transformResponse = function(response) {
+    var parsed, ref;
+    parsed = JSON.parse(response);
+    return (parsed != null ? (ref = parsed.result) != null ? ref.content : void 0 : void 0) || [];
+  };
+
+  transformIdOnlyResponse = function(response) {
+    var parsed, ref;
+    parsed = JSON.parse(response);
+    return {
+      id: parsed != null ? (ref = parsed.result) != null ? ref.content : void 0 : void 0
+    };
+  };
+
+  srv = function($resource, API_URL) {
+    var methods, params, url;
+    url = API_URL + '/v3/projects/copilot/unclaimed';
+    params = {};
+    methods = {
+      put: {
+        method: 'PUT',
+        transformResponse: transformIdOnlyResponse
+      },
+      post: {
+        method: 'POST',
+        transformResponse: transformIdOnlyResponse
+      },
+      get: {
+        transformResponse: transformResponse
+      },
+      query: {
+        isArray: true,
+        transformResponse: transformResponse
+      }
+    };
+    return $resource(url, params, methods);
+  };
+
+  srv.$inject = ['$resource', 'API_URL'];
+
+  angular.module('appirio-tech-ng-api-services').factory('CopilotUnclaimedProjectsAPIService', srv);
 
 }).call(this);
