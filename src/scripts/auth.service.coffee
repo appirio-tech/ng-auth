@@ -74,9 +74,27 @@ AuthService = (
       .then(success)
       .catch(error)
 
-  login      : login
-  logout     : logout
-  isLoggedIn : isLoggedIn
+  sendResetEmail = (email) ->
+    $http
+      method: 'GET'
+      url: "#{API_URL}/v3/users/resetToken?&email=#{email}"
+
+  resetPassword = (handle, token, password) ->
+    $http
+      method: 'PUT'
+      url: "#{API_URL}/v3/users/resetPassword"
+      data:
+        param:
+          handle: handle
+          credential:
+            password: password
+            resetToken: token
+
+  login          : login
+  logout         : logout
+  isLoggedIn     : isLoggedIn
+  sendResetEmail : sendResetEmail
+  resetPassword  : resetPassword
 
 AuthService.$inject = [
  'AuthorizationsAPIService'
