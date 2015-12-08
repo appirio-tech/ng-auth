@@ -79,7 +79,7 @@ AuthService = (
   sendResetEmail = (email) ->
     $http
       method: 'GET'
-      url: "#{API_URL}/v3/users/resetToken?&email=#{email}"
+      url: "#{API_URL}/v3/users/resetToken?email=#{email}&source=connect"
 
   resetPassword = (handle, token, password) ->
     $http
