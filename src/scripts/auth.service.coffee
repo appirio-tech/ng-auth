@@ -6,6 +6,8 @@ AuthService = (
   TokenService
   $q
   API_URL
+  AUTH0_DOMAIN
+  AUTH0_CLIENT_ID
   $http
 ) ->
   isLoggedIn = ->
@@ -82,6 +84,8 @@ AuthService = (
       url: "#{API_URL}/v3/users/resetToken?email=#{email}&source=connect"
 
   resetPassword = (handle, token, password) ->
+    deferred = $q.defer()
+
     $http
       method: 'PUT'
       url: "#{API_URL}/v3/users/resetPassword"
@@ -92,11 +96,58 @@ AuthService = (
             password: password
             resetToken: token
 
-  login          : login
-  logout         : logout
-  isLoggedIn     : isLoggedIn
-  sendResetEmail : sendResetEmail
-  resetPassword  : resetPassword
+  generateSSOUrl = (org, callbackUrl) ->
+    [
+      "https://#{AUTH0_DOMAIN}/authorize?"
+      "response_type=token"
+      "&client_id=#{AUTH0_CLIENT_ID}"
+      "&connection=#{org}"
+      "&redirect_uri=#{API_URL}/pub/callback.html"
+      "&state=#{encodeURIComponent(callbackUrl)}"
+      "&scope=openid%20profile%20offline_access"
+      "&device=device"
+    ].join('')
+
+  getSSOProvider = (emailOrHandle) ->
+    deferred = $q.defer()
+
+    data =
+      param: {}
+
+    if emailOrHandle.indexOf('@') > -1
+      data.param.email = emailOrHandle
+    else
+      data.param.handle = emailOrHandle
+
+    success = (res) ->
+      org = res.data?.result?.org
+
+      if org
+        deferred.resolve res.data.result.org
+      else
+        deferred.reject 'Could not find an SSO organization for that user'
+
+    failure = (res) ->
+      err = res.data?.result?.content || 'Something went wrong'
+
+      deferred.reject err
+
+    config = 
+      method: 'GET'
+      url: "#{API_URL}/v3/users/resetPassword"
+      data: data
+
+    $http(config).then(success).catch(failure)
+
+    deferred.promise
+
+  login            : login
+  logout           : logout
+  isLoggedIn       : isLoggedIn
+  sendResetEmail   : sendResetEmail
+  resetPassword    : resetPassword
+  generateSSOUrl   : generateSSOUrl
+  getSSOProvider   : getSSOProvider
 
 AuthService.$inject = [
   'AuthorizationsAPIService'
@@ -104,6 +155,8 @@ AuthService.$inject = [
   'TokenService'
   '$q'
   'API_URL'
+  'AUTH0_DOMAIN'
+  'AUTH0_CLIENT_ID'
   '$http'
 ]
 
