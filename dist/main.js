@@ -1,16 +1,11 @@
 (function() {
   'use strict';
-  var config, dependencies, run;
+  var config, dependencies;
 
-  dependencies = ['app.constants', 'angular-storage', 'angular-jwt', 'auth0', 'appirio-tech-ng-api-services'];
+  dependencies = ['app.constants', 'angular-storage', 'angular-jwt', 'appirio-tech-ng-api-services'];
 
-  config = function($httpProvider, jwtInterceptorProvider, authProvider, AUTH0_DOMAIN, AUTH0_CLIENT_ID) {
+  config = function($httpProvider, jwtInterceptorProvider) {
     var jwtInterceptor, refreshingToken;
-    authProvider.init({
-      domain: AUTH0_DOMAIN,
-      clientID: AUTH0_CLIENT_ID,
-      loginState: 'login'
-    });
     refreshingToken = null;
     jwtInterceptor = function(TokenService, $http, API_URL) {
       var currentToken, handleRefreshResponse, refreshingTokenComplete;
@@ -45,15 +40,9 @@
     return $httpProvider.interceptors.push('jwtInterceptor');
   };
 
-  run = function(auth, $rootScope, AuthService) {
-    return auth.hookEvents();
-  };
+  config.$inject = ['$httpProvider', 'jwtInterceptorProvider'];
 
-  config.$inject = ['$httpProvider', 'jwtInterceptorProvider', 'authProvider', 'AUTH0_DOMAIN', 'AUTH0_CLIENT_ID'];
-
-  run.$inject = ['auth', '$rootScope', 'AuthService'];
-
-  angular.module('appirio-tech-ng-auth', dependencies).config(config).run(run);
+  angular.module('appirio-tech-ng-auth', dependencies).config(config);
 
 }).call(this);
 
@@ -61,7 +50,7 @@
   'use strict';
   var AuthService;
 
-  AuthService = function(AuthorizationsAPIService, auth, TokenService, $q, API_URL, $http) {
+  AuthService = function(AuthorizationsAPIService, TokenService, $q, API_URL, AUTH0_DOMAIN, AUTH0_CLIENT_ID, $http) {
     var auth0Signin, getNewJWT, isLoggedIn, login, logout, resetPassword, sendResetEmail, setAuth0Tokens, setJWT;
     isLoggedIn = function() {
       return TokenService.tokenIsValid();
@@ -71,36 +60,27 @@
       return $q.when(true);
     };
     auth0Signin = function(options) {
-      var defaultOptions, deferred, lOptions, params, signinError, signinSuccess;
-      deferred = $q.defer();
-      defaultOptions = {
-        retUrl: '/'
-      };
-      lOptions = angular.extend({}, options, defaultOptions);
-      params = {
-        username: lOptions.username,
-        password: lOptions.password,
-        sso: false,
-        connection: 'LDAP',
-        authParams: {
-          scope: 'openid profile offline_access'
+      var config;
+      config = {
+        method: 'POST',
+        url: "https://" + AUTH0_DOMAIN + "/oauth/ro",
+        data: {
+          username: options.username,
+          password: options.password,
+          client_id: AUTH0_CLIENT_ID,
+          sso: false,
+          scope: 'openid profile offline_access',
+          response_type: 'token',
+          connection: 'LDAP',
+          grant_type: 'password',
+          device: 'Browser'
         }
       };
-      signinError = function(err) {
-        return deferred.reject(err);
-      };
-      signinSuccess = function(profile, idToken, accessToken, state, refreshToken) {
-        return deferred.resolve({
-          identity: idToken,
-          refresh: refreshToken
-        });
-      };
-      auth.signin(params, signinSuccess, signinError);
-      return deferred.promise;
+      return $http(config);
     };
-    setAuth0Tokens = function(tokens) {
-      TokenService.setAuth0Token(tokens.identity);
-      return TokenService.setAuth0RefreshToken(tokens.refresh);
+    setAuth0Tokens = function(res) {
+      TokenService.setAuth0Token(res.data.id_token);
+      return TokenService.setAuth0RefreshToken(res.data.fresh_token);
     };
     getNewJWT = function() {
       var newAuth, params;
@@ -132,7 +112,8 @@
       });
     };
     resetPassword = function(handle, token, password) {
-      return $http({
+      var config;
+      config = {
         method: 'PUT',
         url: API_URL + "/v3/users/resetPassword",
         data: {
@@ -144,7 +125,8 @@
             }
           }
         }
-      });
+      };
+      return $http(config);
     };
     return {
       login: login,
@@ -155,7 +137,7 @@
     };
   };
 
-  AuthService.$inject = ['AuthorizationsAPIService', 'auth', 'TokenService', '$q', 'API_URL', '$http'];
+  AuthService.$inject = ['AuthorizationsAPIService', 'TokenService', '$q', 'API_URL', 'AUTH0_DOMAIN', 'AUTH0_CLIENT_ID', '$http'];
 
   angular.module('appirio-tech-ng-auth').factory('AuthService', AuthService);
 
