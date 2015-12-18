@@ -1,4 +1,4 @@
-@import "work-styles";
+@import "work/work-styles";
 
 h1 {
   text-align: center;
@@ -10,9 +10,7 @@ h1 {
   padding         : 20px;
 }
 
-body > .nav {
-  @include flex-center(flex-start, $spacing);
-
+#example-nav {
   a {
     color: white;
     margin: 10px;
