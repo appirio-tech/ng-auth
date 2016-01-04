@@ -14,8 +14,8 @@
     "appirio-tech-ng-api-services": "0.x.x"
   },
   "scripts": {
-    "dev": "webpack-dev-server -d --colors",
-    "clean": "rm -r dist",
-    "build": "webpack --config webpack.config.js; cp example/index.html dist/"
+    "example": "webpack-dev-server -d --colors",
+    "dev": "webpack-dev-server -d --colors --dev",
+    "build": "webpack --bail --progress -p --build"
   }
 }
