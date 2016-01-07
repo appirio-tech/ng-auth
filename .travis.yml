@@ -6,3 +6,11 @@ before_install:
 script:
 - webpack
 sudo: false
+before_deploy:
+- npm-prepublish --verbose
+deploy:
+- provider: npm
+  email: "$NPM_EMAIL"
+  api_key: "$NPM_API_KEY"
+  on:
+    tags: true
