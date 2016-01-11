@@ -2,7 +2,6 @@
 
 AuthService = (
   AuthorizationsAPIService
-  auth
   TokenService
   $q
   API_URL
@@ -19,39 +18,26 @@ AuthService = (
     # Return a promise here for API consistency
     $q.when(true)
 
-  # TODO: Replace this method with a straight $http/$resource call
-  # TODO: Remove the auth0 library
   auth0Signin = (options) ->
-    deferred = $q.defer()
+    config =
+      method: 'POST'
+      url: "https://#{AUTH0_DOMAIN}/oauth/ro"
+      data:
+        username      : options.username
+        password      : options.password
+        client_id     : AUTH0_CLIENT_ID
+        sso           : false
+        scope         : 'openid profile offline_access'
+        response_type : 'token'
+        connection    : 'LDAP'
+        grant_type    : 'password'
+        device        : 'Browser'
 
-    defaultOptions =
-      retUrl: '/'
+    $http(config)
 
-    lOptions = angular.extend {}, options, defaultOptions
-
-    params =
-      username  : lOptions.username
-      password  : lOptions.password
-      sso       : false
-      connection: 'LDAP'
-      authParams:
-        scope: 'openid profile offline_access'
-
-    signinError = (err) ->
-      deferred.reject(err)
-
-    signinSuccess = (profile, idToken, accessToken, state, refreshToken) ->
-      deferred.resolve
-        identity: idToken
-        refresh: refreshToken
-
-    auth.signin params, signinSuccess, signinError
-
-    deferred.promise
-
-  setAuth0Tokens = (tokens) ->
-    TokenService.setAuth0Token tokens.identity
-    TokenService.setAuth0RefreshToken tokens.refresh
+  setAuth0Tokens = (res) ->
+    TokenService.setAuth0Token res.data.id_token
+    TokenService.setAuth0RefreshToken res.data.fresh_token
 
   getNewJWT = ->
     params =
@@ -84,9 +70,13 @@ AuthService = (
       url: "#{API_URL}/v3/users/resetToken?email=#{email}&source=connect"
 
   resetPassword = (handle, token, password) ->
+<<<<<<< HEAD
     deferred = $q.defer()
 
     $http
+=======
+    config =
+>>>>>>> master
       method: 'PUT'
       url: "#{API_URL}/v3/users/resetPassword"
       data:
@@ -96,6 +86,7 @@ AuthService = (
             password: password
             resetToken: token
 
+<<<<<<< HEAD
   generateSSOUrl = (org, callbackUrl) ->
     [
       "https://#{AUTH0_DOMAIN}/authorize?"
@@ -148,10 +139,18 @@ AuthService = (
   resetPassword    : resetPassword
   generateSSOUrl   : generateSSOUrl
   getSSOProvider   : getSSOProvider
+=======
+    $http(config)
+
+  login          : login
+  logout         : logout
+  isLoggedIn     : isLoggedIn
+  sendResetEmail : sendResetEmail
+  resetPassword  : resetPassword
+>>>>>>> master
 
 AuthService.$inject = [
   'AuthorizationsAPIService'
-  'auth'
   'TokenService'
   '$q'
   'API_URL'

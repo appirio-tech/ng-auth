@@ -1,18 +1,16 @@
 language: node_js
 node_js:
-- 0.12.7
-install:
-- npm install -g gulp
-- npm install -g bower
+- 5.2.0
+before_install:
 - npm install
-- bower install
-before_script:
-- gulp clean
-- gulp test
 script:
-- gulp preprocessors
-- gulp useref
-- gulp copy-files
+- webpack
 sudo: false
-after_success:
-- gulp coveralls
+before_deploy:
+- npm-prepublish --verbose
+deploy:
+- provider: npm
+  email: "$NPM_EMAIL"
+  api_key: "$NPM_API_KEY"
+  on:
+    tags: true

@@ -7,8 +7,8 @@ NgAuthController = (AuthService, TokenService, SubmitWorkAPIService) ->
   vm.aRefreshToken = ''
 
   getTokens = ->
-    vm.token         = TokenService.getToken()
-    vm.aRefreshToken = TokenService.getRefreshToken()
+    vm.token         = TokenService.getAppirioJWT()
+    vm.aRefreshToken = TokenService.getAuth0RefreshToken()
 
   vm.login = ->
     onSuccess = ->
@@ -23,14 +23,6 @@ NgAuthController = (AuthService, TokenService, SubmitWorkAPIService) ->
 
     AuthService.login params
 
-  vm.refreshToken = ->
-    onSuccess = ->
-      vm.message = 'refreshToken done'
-
-      getTokens()
-
-    AuthService.refreshToken onSuccess
-
   vm.logout = ->
     AuthService.logout()
 
@@ -40,9 +32,6 @@ NgAuthController = (AuthService, TokenService, SubmitWorkAPIService) ->
 
   vm.isLoggedIn = ->
     vm.message = AuthService.isLoggedIn()
-
-  vm.isAuthenticated = ->
-    vm.message = AuthService.isAuthenticated()
 
   vm.workApi = ->
     resource = SubmitWorkAPIService.get id: 123

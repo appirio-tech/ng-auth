@@ -1,11 +1,22 @@
 {
-  "private": true,
-  "engines": {
-    "node": ">=0.10.0"
-  },
+  "name": "appirio-tech-ng-auth",
+  "version": "0.0.0",
+  "main": "./src/src.coffee",
   "devDependencies": {
-    "appirio-work-styles": "0.x.x",
-    "appirio-gulp-tasks": "3.x.x",
-    "gulp": "^3.8.11"
+    "appirio-tech-webpack-config": "0.x.x",
+    "npm-prepublish": "^1.2.1"
+  },
+  "dependencies": {
+    "angular": "1.4.x",
+    "angular-jwt": "0.0.x",
+    "angular-resource": "1.4.x",
+    "angular-storage": "0.0.x",
+    "angular-ui-router": "0.2.x",
+    "appirio-tech-ng-api-services": "0.x.x"
+  },
+  "scripts": {
+    "example": "webpack-dev-server -d --colors",
+    "dev": "webpack-dev-server -d --colors --dev",
+    "build": "webpack --bail --progress -p --build"
   }
 }
