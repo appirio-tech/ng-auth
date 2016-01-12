@@ -82,11 +82,58 @@ AuthService = (
 
     $http(config)
 
-  login          : login
-  logout         : logout
-  isLoggedIn     : isLoggedIn
-  sendResetEmail : sendResetEmail
-  resetPassword  : resetPassword
+  generateSSOUrl = (org, callbackUrl) ->
+    [
+      "https://#{AUTH0_DOMAIN}/authorize?"
+      "response_type=token"
+      "&client_id=#{AUTH0_CLIENT_ID}"
+      "&connection=#{org}"
+      "&redirect_uri=#{API_URL}/pub/callback.html"
+      "&state=#{encodeURIComponent(callbackUrl)}"
+      "&scope=openid%20profile%20offline_access"
+      "&device=device"
+    ].join('')
+
+  getSSOProvider = (handle) ->
+    filter = encodeURIComponent "handle=#{ handle }"
+
+    AuthException = (params) ->
+      Object.assign this, { location: 'auth.service.coffee' }, params
+
+    success = (res) ->
+      content = res.data?.result?.content
+
+      unless content
+        throw new AuthException
+          message: 'Could not contact login server'
+          reason: 'Body did not contain content'
+          response: res
+
+      unless content.type == 'samlp'
+        throw new AuthException
+          message: 'This handle does not appear to have an SSO login associated'
+          reason: 'No provider of type \'samlp\''
+          response: res
+
+      content.name
+
+    failure = (res) ->
+      throw new AuthException
+        message: res.data?.result?.content || 'Could not contact login server'
+
+    config = 
+      method: 'GET'
+      url: "#{ API_URL }/v3/identityproviders?filter=#{ filter }"
+
+    $http(config).catch(failure).then(success)
+
+  login            : login
+  logout           : logout
+  isLoggedIn       : isLoggedIn
+  sendResetEmail   : sendResetEmail
+  resetPassword    : resetPassword
+  generateSSOUrl   : generateSSOUrl
+  getSSOProvider   : getSSOProvider
 
 AuthService.$inject = [
   'AuthorizationsAPIService'
