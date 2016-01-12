@@ -71,6 +71,7 @@ AuthService = (
 
   resetPassword = (handle, token, password) ->
     config =
+      method: 'PUT'
       url: "#{API_URL}/v3/users/resetPassword"
       data:
         param:
@@ -79,7 +80,7 @@ AuthService = (
             password: password
             resetToken: token
 
-    $http config
+    $http(config)
 
   generateSSOUrl = (org, callbackUrl) ->
     [
@@ -122,7 +123,7 @@ AuthService = (
 
     config = 
       method: 'GET'
-      url: "#{API_URL}/v3/identityproviders?filter=#{ filter }"
+      url: "#{ API_URL }/v3/identityproviders?filter=#{ filter }"
 
     $http(config).catch(failure).then(success)
 
