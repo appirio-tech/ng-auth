@@ -1,6 +1,5 @@
 {
   "name": "appirio-tech-ng-auth",
-  "version": "0.0.0",
   "main": "./src/src.coffee",
   "devDependencies": {
     "appirio-tech-webpack-config": "0.x.x",
