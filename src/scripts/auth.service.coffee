@@ -122,7 +122,7 @@ AuthService = (
 
     config = 
       method: 'GET'
-      url: "https://api.topcoder-dev.com/v3/identityproviders?filter=#{ filter }"
+      url: "#{API_URL}/v3/identityproviders?filter=#{ filter }"
 
     $http(config).catch(failure).then(success)
 
