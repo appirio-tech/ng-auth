@@ -70,14 +70,7 @@ AuthService = (
       url: "#{API_URL}/v3/users/resetToken?email=#{email}&source=connect"
 
   resetPassword = (handle, token, password) ->
-<<<<<<< HEAD
-    deferred = $q.defer()
-
-    $http
-=======
     config =
->>>>>>> master
-      method: 'PUT'
       url: "#{API_URL}/v3/users/resetPassword"
       data:
         param:
@@ -86,7 +79,8 @@ AuthService = (
             password: password
             resetToken: token
 
-<<<<<<< HEAD
+    $http config
+
   generateSSOUrl = (org, callbackUrl) ->
     [
       "https://#{AUTH0_DOMAIN}/authorize?"
@@ -99,38 +93,38 @@ AuthService = (
       "&device=device"
     ].join('')
 
-  getSSOProvider = (emailOrHandle) ->
-    deferred = $q.defer()
+  getSSOProvider = (handle) ->
+    filter = encodeURIComponent "handle=#{ handle }"
 
-    data =
-      param: {}
-
-    if emailOrHandle.indexOf('@') > -1
-      data.param.email = emailOrHandle
-    else
-      data.param.handle = emailOrHandle
+    AuthException = (params) ->
+      Object.assign this, { location: 'auth.service.coffee' }, params
 
     success = (res) ->
-      org = res.data?.result?.org
+      content = res.data?.result?.content
 
-      if org
-        deferred.resolve res.data.result.org
-      else
-        deferred.reject 'Could not find an SSO organization for that user'
+      unless content
+        throw new AuthException
+          message: 'Could not contact login server'
+          reason: 'Body did not contain content'
+          response: res
+
+      unless content.type == 'samlp'
+        throw new AuthException
+          message: 'This handle does not appear to have an SSO login associated'
+          reason: 'No provider of type \'samlp\''
+          response: res
+
+      content.name
 
     failure = (res) ->
-      err = res.data?.result?.content || 'Something went wrong'
-
-      deferred.reject err
+      throw new AuthException
+        message: res.data?.result?.content || 'Could not contact login server'
 
     config = 
       method: 'GET'
-      url: "#{API_URL}/v3/users/resetPassword"
-      data: data
+      url: "https://api.topcoder-dev.com/v3/identityproviders?filter=#{ filter }"
 
-    $http(config).then(success).catch(failure)
-
-    deferred.promise
+    $http(config).catch(failure).then(success)
 
   login            : login
   logout           : logout
@@ -139,15 +133,6 @@ AuthService = (
   resetPassword    : resetPassword
   generateSSOUrl   : generateSSOUrl
   getSSOProvider   : getSSOProvider
-=======
-    $http(config)
-
-  login          : login
-  logout         : logout
-  isLoggedIn     : isLoggedIn
-  sendResetEmail : sendResetEmail
-  resetPassword  : resetPassword
->>>>>>> master
 
 AuthService.$inject = [
   'AuthorizationsAPIService'
