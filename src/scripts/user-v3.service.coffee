@@ -15,9 +15,12 @@ srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootSco
       resource.$promise.then (response) ->
         currentUser      = response
         currentUser.id   = currentUser.userId
-        currentUser.role = if currentUser.isCopilot then 'copilot' else 'customer'
+        currentUser.role = 'customer'
+        currentUser.role = 'copilot' if currentUser.isCopilot
+        currentUser.role = 'admin' if currentUser.isAdmin
 
         currentUser
+
     else
       $q.reject()
 
