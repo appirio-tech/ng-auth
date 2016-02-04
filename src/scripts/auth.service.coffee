@@ -1,5 +1,7 @@
 'use strict'
 
+replace = require 'lodash/replace'
+
 AuthService = (
   AuthorizationsAPIService
   TokenService
@@ -83,12 +85,14 @@ AuthService = (
     $http(config)
 
   generateSSOUrl = (org, callbackUrl) ->
+    apiUrl = replace callbackUrl, 'api-work', 'api'
+
     [
       "https://#{AUTH0_DOMAIN}/authorize?"
       "response_type=token"
       "&client_id=#{AUTH0_CLIENT_ID}"
       "&connection=#{org}"
-      "&redirect_uri=#{API_URL}/pub/callback.html"
+      "&redirect_uri=#{apiUrl}/pub/callback.html"
       "&state=#{encodeURIComponent(callbackUrl)}"
       "&scope=openid%20profile%20offline_access"
       "&device=device"
