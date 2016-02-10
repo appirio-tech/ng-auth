@@ -85,7 +85,7 @@ AuthService = (
     $http(config)
 
   generateSSOUrl = (org, callbackUrl) ->
-    apiUrl = replace callbackUrl, 'api-work', 'api'
+    apiUrl = replace API_URL, 'api-work', 'api'
 
     [
       "https://#{AUTH0_DOMAIN}/authorize?"
