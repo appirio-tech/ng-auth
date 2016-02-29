@@ -1,5 +1,7 @@
 'use strict'
 
+includes = require 'lodash/includes'
+
 srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootScope, $q) ->
   currentUser = null
 
@@ -17,10 +19,9 @@ srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootSco
         currentUser.id   = currentUser.userId
         currentUser.role = 'customer'
         currentUser.role = 'copilot' if currentUser.isCopilot
-        currentUser.role = 'admin' if currentUser.isAdmin
+        currentUser.role = 'admin' if includes decodedToken.roles, 'Connect Support'
 
         currentUser
-
     else
       $q.reject()
 
