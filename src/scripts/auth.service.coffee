@@ -5,6 +5,7 @@ replace = require 'lodash/replace'
 AuthService = (
   AuthorizationsAPIService
   TokenService
+  $log
   $q
   API_URL
   AUTH0_DOMAIN
@@ -31,10 +32,10 @@ AuthService = (
         sso           : false
         scope         : 'openid profile offline_access'
         response_type : 'token'
-        connection    : 'LDAP'
+        connection    : options.connection || 'LDAP'
         grant_type    : 'password'
         device        : 'Browser'
-
+       
     $http(config)
 
   setAuth0Tokens = (res) ->
@@ -142,6 +143,7 @@ AuthService = (
 AuthService.$inject = [
   'AuthorizationsAPIService'
   'TokenService'
+  '$log'
   '$q'
   'API_URL'
   'AUTH0_DOMAIN'
