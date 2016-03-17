@@ -13,7 +13,6 @@ AuthService = (
   AUTH0_CLIENT_ID
   $http
 ) ->
-  #API_URL = 'http://local.topcoder-dev.com:8080'
   
   isLoggedIn = ->
     TokenService.tokenIsValid()
@@ -29,8 +28,6 @@ AuthService = (
         'Authorization': 'Bearer ' + jwt
         
     $http(config)
-      .then (res) ->
-        $log.info res
       .catch (error) ->
         $log.error(error)
 
