@@ -35,7 +35,7 @@ AuthService = (
         connection    : options.connection || 'LDAP'
         grant_type    : 'password'
         device        : 'Browser'
-       
+
     $http(config)
 
   setAuth0Tokens = (res) ->
@@ -47,11 +47,23 @@ AuthService = (
       param:
         refreshToken: TokenService.getAuth0RefreshToken()
         externalToken: TokenService.getAuth0Token()
+    
+    # Fix for: 
+    # https://app.asana.com/0/100297043256537/100297043256590
+    # To handle cookie in API call properly, XHR needs "withCredentials" option (true)
+    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Requests_with_credentials 
+    # TODO:
+    # This should be fixed in AuthorizationsAPIService.
+    config =
+      method: 'POST'
+      url: "#{API_URL}/v3/authorizations"
+      withCredentials: true,
+      data: params
 
-    newAuth = new AuthorizationsAPIService params
+    success = (res) ->
+      res.data?.result?.content?.token
 
-    newAuth.$save().then (res) ->
-      res.result?.content?.token
+    $http(config).then (success)
 
   setJWT = (JWT) ->
     TokenService.setAppirioJWT JWT
