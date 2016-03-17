@@ -7,19 +7,35 @@ AuthService = (
   TokenService
   $log
   $q
+  $cookies
   API_URL
   AUTH0_DOMAIN
   AUTH0_CLIENT_ID
   $http
 ) ->
+  API_URL = 'http://local.topcoder-dev.com:8080'
+  
   isLoggedIn = ->
     TokenService.tokenIsValid()
-
+  
   logout = ->
+    jwt = TokenService.getAppirioJWT() || ''
     TokenService.deleteAllTokens()
-
+    
+    config =
+      method: 'DELETE'
+      url: "#{API_URL}/v3/authorizations/1"
+      headers:
+        'Authorization': 'Bearer ' + jwt
+        
+    $http(config)
+      .then (res) ->
+        $log.info res
+      .catch (error) ->
+        $log.error(error)
+      
     # Return a promise here for API consistency
-    $q.when(true)
+    #$q.when(true)
 
   auth0Signin = (options) ->
     config =
@@ -39,8 +55,8 @@ AuthService = (
     $http(config)
 
   setAuth0Tokens = (res) ->
-    TokenService.setAuth0Token res.data.id_token
-    TokenService.setAuth0RefreshToken res.data.fresh_token
+    TokenService.setAuth0Token res?.data?.id_token
+    TokenService.setAuth0RefreshToken res?.data?.refresh_token
 
   getNewJWT = ->
     params =
@@ -67,6 +83,10 @@ AuthService = (
 
   setJWT = (JWT) ->
     TokenService.setAppirioJWT JWT
+    
+  setSSOToken = ->
+    tcsso = $cookies.get('tcsso') || ''
+    TokenService.setSSOToken tcsso
 
   login = (options) ->
     success = options.success || angular.noop
@@ -76,6 +96,7 @@ AuthService = (
       .then(setAuth0Tokens)
       .then(getNewJWT)
       .then(setJWT)
+      .then(setSSOToken)
       .then(success)
       .catch(error)
 
@@ -157,6 +178,7 @@ AuthService.$inject = [
   'TokenService'
   '$log'
   '$q'
+  '$cookies'
   'API_URL'
   'AUTH0_DOMAIN'
   'AUTH0_CLIENT_ID'

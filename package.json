@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "angular": "1.4.x",
+    "angular-cookies": "^1.5.1",
     "angular-jwt": "0.0.x",
     "angular-resource": "1.4.x",
     "angular-storage": "0.0.x",

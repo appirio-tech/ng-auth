@@ -32,11 +32,21 @@ TokenService = (
 
   deleteAuth0Token = ->
     store.remove 'auth0Jwt'
+  
+  setSSOToken = (token) ->
+    store.set 'v2SSOToken', token
+
+  getSSOToken = (token) ->
+    store.get 'v2SSOToken', token
+
+  deleteSSOToken = ->
+    store.remove 'v2SSOToken'
 
   deleteAllTokens = ->
     deleteAppirioJWT()
     deleteAuth0RefreshToken()
     deleteAuth0Token()
+    deleteSSOToken()
 
   decodeToken = ->
     token = getAppirioJWT()
@@ -72,6 +82,9 @@ TokenService = (
   setAuth0Token            : setAuth0Token
   getAuth0Token            : getAuth0Token
   deleteAuth0Token         : deleteAuth0Token
+  setSSOToken              : setSSOToken
+  getSSOToken              : getSSOToken
+  deleteSSOToken           : deleteSSOToken
   deleteAllTokens          : deleteAllTokens
   tokenIsValid             : tokenIsValid
   tokenIsExpired           : tokenIsExpired

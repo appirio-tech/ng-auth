@@ -25,6 +25,15 @@ describe 'Token Service', ->
   it 'should have a setAppirioJWT method', ->
     expect(srv.setAppirioJWT).to.be.ok
 
+  it 'should have a setSSOToken method', ->
+    expect(srv.setSSOToken).to.be.ok
+
+  it 'should have a getSSOToken method', ->
+    expect(srv.getSSOToken).to.be.ok
+
+  it 'should have a deleteSSOToken method', ->
+    expect(srv.deleteSSOToken).to.be.ok
+
   it 'should have a tokenIsValid method', ->
     expect(srv.tokenIsValid).to.be.ok
 
