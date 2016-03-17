@@ -13,7 +13,7 @@ AuthService = (
   AUTH0_CLIENT_ID
   $http
 ) ->
-  API_URL = 'http://local.topcoder-dev.com:8080'
+  #API_URL = 'http://local.topcoder-dev.com:8080'
   
   isLoggedIn = ->
     TokenService.tokenIsValid()
@@ -33,9 +33,6 @@ AuthService = (
         $log.info res
       .catch (error) ->
         $log.error(error)
-      
-    # Return a promise here for API consistency
-    #$q.when(true)
 
   auth0Signin = (options) ->
     config =
