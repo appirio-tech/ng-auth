@@ -3,7 +3,6 @@
 replace = require 'lodash/replace'
 
 AuthService = (
-  AuthorizationsAPIService
   TokenService
   $log
   $q
@@ -13,14 +12,14 @@ AuthService = (
   AUTH0_CLIENT_ID
   $http
 ) ->
-  
+
   isLoggedIn = ->
     TokenService.tokenIsValid()
-  
+
   logout = ->
     jwt = TokenService.getAppirioJWT() || ''
     TokenService.deleteAllTokens()
-    
+
     config =
       method: 'DELETE'
       url: "#{API_URL}/v3/authorizations/1"
@@ -57,13 +56,7 @@ AuthService = (
       param:
         refreshToken: TokenService.getAuth0RefreshToken()
         externalToken: TokenService.getAuth0Token()
-    
-    # Fix for: 
-    # https://app.asana.com/0/100297043256537/100297043256590
-    # To handle cookie in API call properly, XHR needs "withCredentials" option (true)
-    # https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS#Requests_with_credentials 
-    # TODO:
-    # This should be fixed in AuthorizationsAPIService.
+
     config =
       method: 'POST'
       url: "#{API_URL}/v3/authorizations"
@@ -77,7 +70,7 @@ AuthService = (
 
   setJWT = (JWT) ->
     TokenService.setAppirioJWT JWT
-    
+
   setSSOToken = ->
     tcsso = $cookies.get('tcsso') || ''
     TokenService.setSSOToken tcsso
@@ -168,7 +161,6 @@ AuthService = (
   getSSOProvider   : getSSOProvider
 
 AuthService.$inject = [
-  'AuthorizationsAPIService'
   'TokenService'
   '$log'
   '$q'

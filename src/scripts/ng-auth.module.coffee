@@ -5,7 +5,6 @@ dependencies = [
   'angular-storage'
   'angular-jwt'
   'ngCookies'
-  'appirio-tech-ng-api-services'
 ]
 
 config = (
