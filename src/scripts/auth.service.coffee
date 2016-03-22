@@ -159,6 +159,7 @@ AuthService = (
   resetPassword    : resetPassword
   generateSSOUrl   : generateSSOUrl
   getSSOProvider   : getSSOProvider
+  getNewJWT        : getNewJWT
 
 AuthService.$inject = [
   'TokenService'
