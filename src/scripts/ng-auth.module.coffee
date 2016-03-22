@@ -4,8 +4,8 @@ dependencies = [
   'app.constants'
   'angular-storage'
   'angular-jwt'
-  'appirio-tech-ng-api-services'
   'ngCookies'
+  'appirio-tech-ng-api-services'
 ]
 
 config = (
