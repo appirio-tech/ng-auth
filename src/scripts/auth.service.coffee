@@ -3,22 +3,32 @@
 replace = require 'lodash/replace'
 
 AuthService = (
-  AuthorizationsAPIService
   TokenService
+  $log
   $q
+  $cookies
   API_URL
   AUTH0_DOMAIN
   AUTH0_CLIENT_ID
   $http
 ) ->
+
   isLoggedIn = ->
     TokenService.tokenIsValid()
 
   logout = ->
+    jwt = TokenService.getAppirioJWT() || ''
     TokenService.deleteAllTokens()
 
-    # Return a promise here for API consistency
-    $q.when(true)
+    config =
+      method: 'DELETE'
+      url: "#{API_URL}/v3/authorizations/1"
+      headers:
+        'Authorization': 'Bearer ' + jwt
+        
+    $http(config)
+      .catch (error) ->
+        $log.error(error)
 
   auth0Signin = (options) ->
     config =
@@ -31,15 +41,15 @@ AuthService = (
         sso           : false
         scope         : 'openid profile offline_access'
         response_type : 'token'
-        connection    : 'LDAP'
+        connection    : options.connection || 'LDAP'
         grant_type    : 'password'
         device        : 'Browser'
 
     $http(config)
 
   setAuth0Tokens = (res) ->
-    TokenService.setAuth0Token res.data.id_token
-    TokenService.setAuth0RefreshToken res.data.fresh_token
+    TokenService.setAuth0Token res?.data?.id_token
+    TokenService.setAuth0RefreshToken res?.data?.refresh_token
 
   getNewJWT = ->
     params =
@@ -47,13 +57,23 @@ AuthService = (
         refreshToken: TokenService.getAuth0RefreshToken()
         externalToken: TokenService.getAuth0Token()
 
-    newAuth = new AuthorizationsAPIService params
+    config =
+      method: 'POST'
+      url: "#{API_URL}/v3/authorizations"
+      withCredentials: true,
+      data: params
 
-    newAuth.$save().then (res) ->
-      res.result?.content?.token
+    success = (res) ->
+      res.data?.result?.content?.token
+
+    $http(config).then (success)
 
   setJWT = (JWT) ->
     TokenService.setAppirioJWT JWT
+
+  setSSOToken = ->
+    tcsso = $cookies.get('tcsso') || ''
+    TokenService.setSSOToken tcsso
 
   login = (options) ->
     success = options.success || angular.noop
@@ -63,6 +83,7 @@ AuthService = (
       .then(setAuth0Tokens)
       .then(getNewJWT)
       .then(setJWT)
+      .then(setSSOToken)
       .then(success)
       .catch(error)
 
@@ -140,9 +161,10 @@ AuthService = (
   getSSOProvider   : getSSOProvider
 
 AuthService.$inject = [
-  'AuthorizationsAPIService'
   'TokenService'
+  '$log'
   '$q'
+  '$cookies'
   'API_URL'
   'AUTH0_DOMAIN'
   'AUTH0_CLIENT_ID'
