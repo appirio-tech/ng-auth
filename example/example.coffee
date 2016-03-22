@@ -1,4 +1,5 @@
 require 'appirio-tech-api-schemas'
+require 'appirio-tech-ng-work-constants'
 require './styles/main.scss'
 require './scripts/example.module'
 require './scripts/routes'
