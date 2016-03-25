@@ -1,12 +1,17 @@
 'use strict'
 
 includes = require 'lodash/includes'
+merge = require 'lodash/merge'
 
-srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootScope, $q) ->
+{ TC_JWT } = require './constants'
+{ isLoggedIn, registerUser } = require './auth.js'
+{ decodeToken } = require './token.js'
+
+srv = (UserV3APIService, profilesAPIService, $rootScope, $q) ->
   currentUser = null
 
   loadUser = ->
-    decodedToken = TokenService.decodeToken()
+    decodedToken = decodeToken( localStorage.getItem(TC_JWT) )
 
     if decodedToken.userId
       params =
@@ -29,42 +34,17 @@ srv = (UserV3APIService, profilesAPIService, TokenService, AuthService, $rootSco
   getCurrentUser = ->
     currentUser
 
-  createUser = (options, callback, onError) ->
-    if options.handle && options.email && options.password
-      userParams =
-        param:
-          handle     : options.handle
-          email      : options.email
-          utmSource  : options.utmSource || 'asp'
-          utmMedium  : options.utmMedium || ''
-          utmCampaign: options.utmCampaign || ''
-          firstName  : options.firstname || ''
-          lastName   : options.lastname || ''
-          credential :
-            password: options.password
+  createUser = (body) ->
+    registerUser(body)
 
-      if options.afterActivationURL
-        userParams.options =
-          afterActivationURL: options.afterActivationURL
-
-      resource = UserV3APIService.post userParams
-
-      resource.$promise.then (response) ->
-        callback? response
-
-      resource.$promise.catch (response) ->
-        onError? response
-
-      resource.$promise.finally (response) ->
-
-  $rootScope.$watch AuthService.isLoggedIn, ->
+  $rootScope.$watch isLoggedIn, ->
     currentUser = null
-    loadUser() if AuthService.isLoggedIn()
+    loadUser() if isLoggedIn()
 
   getCurrentUser: getCurrentUser
   createUser    : createUser
   loadUser      : loadUser
 
-srv.$inject = ['UserV3APIService', 'profilesAPIService', 'TokenService', 'AuthService', '$rootScope', '$q']
+srv.$inject = ['UserV3APIService', 'profilesAPIService', '$rootScope', '$q']
 
 angular.module('appirio-tech-ng-auth').factory 'UserV3Service', srv

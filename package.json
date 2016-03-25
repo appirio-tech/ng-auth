@@ -4,16 +4,16 @@
   "main": "./src/src.coffee",
   "devDependencies": {
     "appirio-tech-webpack-config": "0.x.x",
+    "eslint": "^2.4.0",
     "npm-prepublish": "^1.2.1"
+  },
+  "devDependencies": {
+    "angular-ui-router": "0.2.x"
   },
   "dependencies": {
     "angular": "1.4.x",
-    "angular-cookies": "^1.5.1",
     "angular-jwt": "0.0.x",
-    "angular-resource": "1.4.x",
-    "angular-storage": "0.0.x",
-    "angular-ui-router": "0.2.x",
-    "appirio-tech-ng-work-constants": "0.0.1"
+    "isomorphic-fetch": "^2.2.1"
   },
   "scripts": {
     "example": "webpack-dev-server -d --colors",
