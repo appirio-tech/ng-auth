@@ -1,25 +1,16 @@
 'use strict'
 
-NgAuthController = (AuthService, TokenService, SubmitWorkAPIService) ->
+NgAuthController = (AuthService, SubmitWorkAPIService) ->
   vm              = this
   vm.message      = ''
-  vm.token        = ''
-  vm.aRefreshToken = ''
-
-  getTokens = ->
-    vm.token         = TokenService.getAppirioJWT()
-    vm.aRefreshToken = TokenService.getAuth0RefreshToken()
 
   vm.login = ->
     onSuccess = ->
       vm.message = 'login done'
 
-      getTokens()
-
     params =
       username: 'happyTurtle'
       password: 'eatingAFlower'
-      success: onSuccess
 
     AuthService.login params
 
@@ -27,8 +18,6 @@ NgAuthController = (AuthService, TokenService, SubmitWorkAPIService) ->
     AuthService.logout()
 
     vm.message = 'logout done'
-
-    getTokens()
 
   vm.isLoggedIn = ->
     vm.message = AuthService.isLoggedIn()
@@ -40,12 +29,10 @@ NgAuthController = (AuthService, TokenService, SubmitWorkAPIService) ->
       vm.message = response
 
   activate = ->
-    getTokens()
-
     vm
 
   activate()
 
-NgAuthController.$inject = ['AuthService', 'TokenService', 'SubmitWorkAPIService']
+NgAuthController.$inject = ['AuthService', 'SubmitWorkAPIService']
 
 angular.module('example').controller 'NgAuthController', NgAuthController

@@ -1,9 +1,11 @@
 require 'appirio-tech-api-schemas'
 require 'appirio-tech-ng-work-constants'
+require 'angular-ui-router'
 require './styles/main.scss'
 require './scripts/example.module'
 require './scripts/routes'
 require './scripts/ng-auth.controller'
+require '../src/src.coffee'
 
 exampleNav = require './nav.jade'
 

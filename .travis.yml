@@ -1,11 +1,8 @@
 language: node_js
 node_js:
-- 5.2.0
+- 5.9.1
 before_install:
 - npm install
-script:
-- webpack
-sudo: false
 before_deploy:
 - npm-prepublish --verbose
 deploy:
