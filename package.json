@@ -3,21 +3,21 @@
   "version": "0.0.0",
   "main": "./src/src.coffee",
   "devDependencies": {
-    "appirio-tech-webpack-config": "0.x.x",
-    "eslint": "^2.4.0",
-    "npm-prepublish": "^1.2.1"
-  },
-  "devDependencies": {
-    "angular-ui-router": "0.2.x"
+    "angular-ui-router": "0.2.x",
+    "appirio-tech-webpack-config": "^0.2.27",
+    "coffee-script": "^1.10.0"
   },
   "dependencies": {
     "angular": "1.4.x",
     "angular-jwt": "0.0.x",
-    "isomorphic-fetch": "^2.2.1"
+    "appirio-tech-ng-api-services": "^1.0.5",
+    "appirio-tech-ng-work-constants": "0.0.1",
+    "isomorphic-fetch": "^2.2.1",
+    "lodash": "^4.6.1"
   },
   "scripts": {
-    "example": "webpack-dev-server -d --colors",
-    "dev": "webpack-dev-server -d --colors --dev",
+    "example": "webpack-dev-server --history-api-fallback --inline --progress",
+    "dev": "webpack-dev-server --history-api-fallback --dev --inline --progress",
     "build": "webpack --bail --progress -p --build"
   }
 }

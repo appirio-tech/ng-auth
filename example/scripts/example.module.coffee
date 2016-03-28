@@ -2,7 +2,6 @@
 
 dependencies = [
   'ui.router'
-  'ngResource'
   'app.constants'
   'appirio-tech-ng-auth'
 ]

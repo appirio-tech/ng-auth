@@ -6,6 +6,7 @@
 
 dependencies = [
   'angular-jwt'
+  'appirio-tech-ng-api-services'
 ]
 
 config = (
