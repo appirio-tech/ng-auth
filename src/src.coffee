@@ -1,8 +1,0 @@
-require 'angular'
-require 'angular-ui-router'
-require 'angular-jwt'
-require 'appirio-tech-ng-work-constants'
-require 'appirio-tech-ng-api-services'
-require './scripts/ng-auth.module'
-require './scripts/auth.service'
-require './scripts/user-v3.service'
