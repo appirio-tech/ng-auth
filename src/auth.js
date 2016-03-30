@@ -144,26 +144,8 @@ function setSSOToken() {
 
 // refreshPromise is needed outside the function scope to allow multiple calls
 // to chain off an existing promise
-let refreshPromise = null
-export function ensureFreshToken() {
+export function refreshToken() {
   const token = localStorage.getItem(TC_JWT)
-
-  if (token === null) {
-    return Promise.resolve(token)
-  }
-
-  // Continue if the token is fresh
-  if (!isTokenExpired(token, 60)) {
-    return Promise.resolve(token)
-  }
-
-  // If we are already refreshing the token for other actions, append this
-  // request to the chain
-  if (refreshPromise) {
-    return refreshPromise
-  }
-
-  // Configure our fresh request
   const url = API_URL + '/v3/authorizations/1'
   const config = {
     headers: {
@@ -171,21 +153,14 @@ export function ensureFreshToken() {
     }
   }
 
-  refreshPromise = fetchJSON(url, config)
+  return fetchJSON(url, config)
     .then( data => {
       // Assign it to local storage
       const newToken = get(data, 'result.content.token')
       localStorage.setItem(TC_JWT, newToken)
 
-      // Clear our promise chain
-      refreshPromise = null
       return newToken
     })
-    .catch( () => {
-      refreshPromise = null
-    })
-
-  return refreshPromise
 }
 
 export function login(options) {

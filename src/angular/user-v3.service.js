@@ -2,33 +2,34 @@
 
 import includes from 'lodash/includes'
 import merge from 'lodash/merge'
-import { TC_JWT } from '../constants'
-import { isLoggedIn, registerUser} from '../auth.js'
+import { registerUser} from '../auth.js'
 import { decodeToken } from '../token.js'
+import { getToken } from '../connector/connector-wrapper.js'
 
 const UserV3Service = function() {
   let currentUser = null
 
   const loadUser = function() {
-    const decodedToken = decodeToken( localStorage.getItem(TC_JWT) )
+    return getToken()
+      .then( token => {
+        const decodedToken = decodeToken( token )
 
-    if (decodedToken.userId) {
-      currentUser = decodedToken
-      currentUser.id = currentUser.userId
-      currentUser.role = 'customer'
+        if (decodedToken.userId) {
+          currentUser = decodedToken
+          currentUser.id = currentUser.userId
+          currentUser.role = 'customer'
 
-      if (includes(decodedToken.roles, 'Connect Copilot')) {
-        currentUser.role = 'copilot'
-      }
+          if (includes(decodedToken.roles, 'Connect Copilot')) {
+            currentUser.role = 'copilot'
+          }
 
-      if (includes(decodedToken.roles, 'Connect Support')) {
-        currentUser.role = 'admin'
-      }
+          if (includes(decodedToken.roles, 'Connect Support')) {
+            currentUser.role = 'admin'
+          }
+        }
 
-      return Promise.resolve(currentUser)
-    } else {
-      return Promise.reject()
-    }
+        return currentUser
+      })
   }
 
   const getCurrentUser = function() {

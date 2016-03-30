@@ -1,4 +1,4 @@
-import { GET_TOKEN_REQUEST, GET_TOKEN_SUCCESS, GET_TOKEN_FAILURE } from '../constants.js'
+import { GET_TOKEN_REQUEST, GET_TOKEN_SUCCESS, GET_TOKEN_FAILURE, REFRESH_TOKEN_REQUEST, REFRESH_TOKEN_SUCCESS, REFRESH_TOKEN_FAILURE } from '../constants.js'
 import iframe from './iframe.js'
 
 let loading = new Promise(function(resolve, reject) {
@@ -8,35 +8,38 @@ let loading = new Promise(function(resolve, reject) {
   }
 })
 
-export const getToken = function (credentials) {
-  function tokenRequest() {
+const proxyCall = function(REQUEST, SUCCESS, FAILURE, params = {}) {
+  function request() {
     return new Promise( function(resolve, reject) {
-      function success(e) {
-        resolve()
-      }
-
-      function failure(e) {
-        reject()
-      }
-
       function receiveMessage(e) {
-        console.log('host event', e)
+        console.log('host event', e.data)
+        window.removeEventListener('message', receiveMessage)
 
-        if (e.data.type === GET_TOKEN_SUCCESS) success(e.data)
-        if (e.data.type === GET_TOKEN_FAILURE) failure(e.data)
+        if (e.data.type === SUCCESS) resolve(e.data)
+        if (e.data.type === FAILURE) reject(e.error)
       }
 
-      window.addEventListener("message", receiveMessage)
+      window.addEventListener('message', receiveMessage)
 
-      iframe.contentWindow.postMessage({
-        type: GET_TOKEN_REQUEST
-      }, 'http://localhost:8000')
+      const payload = Object.assign({}, { type: REQUEST }, params)
+
+      iframe.contentWindow.postMessage(payload, 'http://localhost:8000')
     })
   }
 
   if (loading) {
-    return loading = loading.then(tokenRequest)
+    return loading = loading.then(request)
   } else {
-    return tokenRequest()
+    return request()
   }
+}
+
+export const getToken = function () {
+  return proxyCall(GET_TOKEN_REQUEST, GET_TOKEN_SUCCESS, GET_TOKEN_FAILURE)
+    .then( data => data.token )
+}
+
+export const refreshToken = function () {
+  return proxyCall(REFRESH_TOKEN_REQUEST, REFRESH_TOKEN_SUCCESS, REFRESH_TOKEN_FAILURE)
+    .then( data => data.token )
 }

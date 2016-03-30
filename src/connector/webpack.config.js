@@ -1,24 +1,20 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
-module.exports = {
+process.env.API_URL = 'https://api-work.topcoder-dev.com'
+
+require('coffee-script/register');
+
+const config = require('appirio-tech-webpack-config')({
+  dirname: __dirname
+});
+
+module.exports = Object.assign(config, {
   entry: path.join(__dirname, '/connector-embed.js'),
   output: {
     path: path.join(__dirname, '../../dist/connector-embed'),
     publicPath: '',
     filename: 'bundle.js'
-  },
-  module: {
-    loaders: [
-      { test: /\.(js|jsx)$/,
-        loader: 'babel',
-        query: {
-          presets: [ 'es2015', 'react', 'stage-2' ],
-          plugins: [ 'lodash' ]
-        }
-      },
-      { test: /\.jade$/, loader: 'jade' }
-    ]
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -27,4 +23,4 @@ module.exports = {
       filename: 'index.html'
     })
   ]
-}
+})

@@ -16,8 +16,8 @@
   "scripts": {
     "example": "webpack-dev-server --history-api-fallback --inline --progress",
     "dev": "webpack-dev-server --history-api-fallback --dev --inline --progress",
-    "build:connector": "webpack --bail --progress -p --config ./src/connector/webpack.config.js",
-    "build:connector:watch": "webpack --bail --progress -p --watch --config ./src/connector/webpack.config.js",
+    "build:connector": "webpack --bail --progress -p --dev --config ./src/connector/webpack.config.js",
+    "analyze:connector": "webpack -p --dev --config ./src/connector/webpack.config.js --json | webpack-bundle-size-analyzer",
     "build": "webpack --bail --progress -p --build"
   }
 }

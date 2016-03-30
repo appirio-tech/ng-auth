@@ -1,26 +1,10 @@
 'use strict'
 
-import { login, logout, sendResetEmail, resetPassword, generateSSOUrl, getSSOProvider, getNewJWT } from '../auth.js'
-import { getToken } from '../connector/connector-wrapper.js'
+import { isLoggedIn } from '../auth.js'
 
 const AuthService = function() {
-  function isLoggedIn() {
-    return getToken().then( (token) => {
-      console.log(token)
-    }, (err) => {
-      console.log(err)
-    })
-  }
-
   return {
-    login: login,
-    logout: logout,
     isLoggedIn: isLoggedIn,
-    sendResetEmail: sendResetEmail,
-    resetPassword: resetPassword,
-    generateSSOUrl: generateSSOUrl,
-    getSSOProvider: getSSOProvider,
-    getNewJWT: getNewJWT
   }
 }
 
