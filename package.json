@@ -16,6 +16,8 @@
   "scripts": {
     "example": "webpack-dev-server --history-api-fallback --inline --progress",
     "dev": "webpack-dev-server --history-api-fallback --dev --inline --progress",
+    "build:connector": "webpack --bail --progress -p --config ./src/connector/webpack.config.js",
+    "build:connector:watch": "webpack --bail --progress -p --watch --config ./src/connector/webpack.config.js",
     "build": "webpack --bail --progress -p --build"
   }
 }

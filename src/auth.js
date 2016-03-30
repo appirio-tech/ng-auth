@@ -56,6 +56,10 @@ export function isLoggedIn() {
   return localStorage.getItem(TC_JWT) !== null
 }
 
+export function getToken() {
+  return localStorage.getItem(TC_JWT)
+}
+
 export function logout() {
   const jwt = localStorage.getItem(TC_JWT) || ''
   const url = API_URL + '/v3/authorizations/1'
