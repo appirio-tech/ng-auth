@@ -29,7 +29,7 @@ AuthService = (
         sso           : false
         scope         : 'openid profile offline_access'
         response_type : 'token'
-        connection    : options.connector || 'LDAP'
+        connection    : options.connection || 'TC-User-Database'
         grant_type    : 'password'
         device        : 'Browser'
 
