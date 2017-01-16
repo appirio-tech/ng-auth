@@ -29,7 +29,7 @@ AuthService = (
         sso           : false
         scope         : 'openid profile offline_access'
         response_type : 'token'
-        connection    : 'LDAP'
+        connection    : options.connector || 'LDAP'
         grant_type    : 'password'
         device        : 'Browser'
 
