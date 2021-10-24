@@ -7,10 +7,10 @@
     "npm-prepublish": "^1.2.1"
   },
   "dependencies": {
-    "angular": "1.4.x",
+    "angular": "1.8.2",
     "angular-cookies": "^1.5.1",
     "angular-jwt": "0.0.x",
-    "angular-resource": "1.4.x",
+    "angular-resource": "1.8.2",
     "angular-storage": "0.0.x",
     "angular-ui-router": "0.2.x",
     "appirio-tech-ng-work-constants": "0.0.1"
